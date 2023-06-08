@@ -1,5 +1,4 @@
 <p align="center">
-  <img src=""/>
 </p>
 <p align="center">Lyra Addon is a Meteor Client addon that has features specificed for Creative Mode/Creative Servers.</p>
 <p align="center">
