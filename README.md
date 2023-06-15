@@ -7,12 +7,9 @@
 </a>
   <a href="https://github.com/RattlesHyper/Lyra-Addon/releases">
   <img src="https://img.shields.io/github/downloads/RattlesHyper/Lyra-Addon/total?color=red&style=for-the-badge"/>
+      <a href="https://discord.gg/uFpaAZdVgS"><img src="https://img.shields.io/discord/935341227400904734?label=DISCORD&color=red&style=for-the-badge"></a>
   </a>
 </p>
-
-<div align="center">
-  <a href="https://discord.gg/uFpaAZdVgS"><img src="https://img.shields.io/discord/935341227400904734?label=DISCORD&color=red&style=for-the-badge"></a>
-</div>
 
 <hr />
 
