@@ -11,7 +11,7 @@
 </p>
 
 <div align="center">
-  <a href="https://discord.gg/uFpaAZdVgS"><img src="https://invidget.switchblade.xyz/uFpaAZdVgS"></a>
+  <a href="https://discord.gg/uFpaAZdVgS"><img src="https://img.shields.io/discord/935341227400904734?label=DISCORD&color=red&style=for-the-badge"></a>
 </div>
 
 <hr />
