@@ -2,12 +2,14 @@ package com.lyra.addon.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import meteordevelopment.meteorclient.systems.commands.Command;
+import meteordevelopment.meteorclient.commands.Command;
 import net.minecraft.command.CommandSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.text.Text;
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
+
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class RenameCommand extends Command {
     public RenameCommand() {
