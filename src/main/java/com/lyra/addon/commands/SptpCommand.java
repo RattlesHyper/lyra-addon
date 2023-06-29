@@ -2,8 +2,8 @@ package com.lyra.addon.commands;
 
 import com.lyra.addon.modules.SpectatorTeleport;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import meteordevelopment.meteorclient.systems.commands.Command;
-import meteordevelopment.meteorclient.systems.commands.arguments.PlayerListEntryArgumentType;
+import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.commands.arguments.PlayerListEntryArgumentType;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.network.PlayerListEntry;
@@ -14,6 +14,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
+
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class SptpCommand extends Command {
     public SptpCommand() {
         super("sptp", "Teleports you with Spectator Mode Teleport packet.");

@@ -1,13 +1,16 @@
 package com.lyra.addon.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import meteordevelopment.meteorclient.systems.commands.Command;
-import meteordevelopment.meteorclient.systems.commands.arguments.PlayerArgumentType;
+import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.commands.arguments.PlayerArgumentType;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
+
+import static meteordevelopment.meteorclient.MeteorClient.mc;
+
 public class ItemStealer extends Command {
     public ItemStealer() {
         super("steal", "Steals the targets held item. Creative mode only.");

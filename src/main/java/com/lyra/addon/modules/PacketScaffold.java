@@ -76,7 +76,7 @@ public class PacketScaffold extends Module {
     }
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        BlockPos customPos = new BlockPos(mc.player.getPos().x, isYlock.get() ? ylock : mc.player.getY() -1, mc.player.getZ());
+        BlockPos customPos = new BlockPos((int) mc.player.getPos().x, (int) (isYlock.get() ? ylock : mc.player.getY() -1), (int) mc.player.getZ());
         Hand customHand = handMode.get();
         BlockHitResult customHitResult = new BlockHitResult(
             new Vec3d(customPos.getX(), customPos.getY(), customPos.getZ()),
