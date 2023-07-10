@@ -7,6 +7,7 @@ import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.systems.commands.Commands;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.movement.Scaffold;
 import org.slf4j.Logger;
 
 
@@ -28,14 +29,14 @@ public class Addon extends MeteorAddon {
         Modules.get().add(new AutoMap());
         Modules.get().add(new ForEach());
         Modules.get().add(new SpectatorTeleport());
-
-
+        Modules.get().add(new TpAura());
 
         // Commands
         Commands.get().add(new StackCommand());
         Commands.get().add(new ItemStealer());
         Commands.get().add(new RenameCommand());
         Commands.get().add(new SptpCommand());
+        Commands.get().add(new SummonCommand());
 
 
     }
