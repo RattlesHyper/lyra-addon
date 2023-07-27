@@ -2,7 +2,7 @@
   "required": true,
   "package": "com.lyra.addon.mixin",
   "compatibilityLevel": "JAVA_17",
-  "client": [],
+  "client": ["ItemStackMixin"],
   "injectors": {
     "defaultRequire": 1
   }
