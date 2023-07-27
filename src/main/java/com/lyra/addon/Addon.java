@@ -22,12 +22,15 @@ public class Addon extends MeteorAddon {
         Modules.get().add(new ItemDropper());
         Modules.get().add(new RainbowArmor());
         Modules.get().add(new CommandAura());
-        Modules.get().add(new NBTGrabber());
         Modules.get().add(new ChatColor());
         Modules.get().add(new PacketScaffold());
         Modules.get().add(new AutoMap());
         Modules.get().add(new ForEach());
         Modules.get().add(new SpectatorTeleport());
+        Modules.get().add(new DisableTooltips());
+        Modules.get().add(new AutoClip());
+        Modules.get().add(new NoClearChat());
+        Modules.get().add(new TpAura());
 
 
 
@@ -37,6 +40,7 @@ public class Addon extends MeteorAddon {
         Commands.add(new ItemStealer());
         Commands.add(new RenameCommand());
         Commands.add(new SptpCommand());
+        Commands.add(new SummonCommand());
 
 
     }

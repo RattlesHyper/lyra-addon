@@ -35,25 +35,25 @@ public class AutoMap extends Module {
         .sliderRange(1, 20)
         .build()
     );
-    private final Setting < Boolean > isDetectBlock = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> isDetectBlock = sgGeneral.add(new BoolSetting.Builder()
         .name("detect-block")
         .description("Detects if theres any blocks under before moving to the next block.")
         .defaultValue(false)
         .build()
     );
-    private final Setting < Boolean > isLookAt = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> isLookAt = sgGeneral.add(new BoolSetting.Builder()
         .name("look-at")
         .description("Looks at the block under you.")
         .defaultValue(false)
         .build()
     );
-    private final Setting < Boolean > isAutoToggle = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> isAutoToggle = sgGeneral.add(new BoolSetting.Builder()
         .name("auto-disable")
         .description("Disables the module when it cant find the next block.")
         .defaultValue(false)
         .build()
     );
-    private final Setting < Boolean > isGamemode = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> isGamemode = sgGeneral.add(new BoolSetting.Builder()
         .name("detect-game-mode")
         .description("Disables the module when you're not in creative.")
         .defaultValue(false)
@@ -71,13 +71,13 @@ public class AutoMap extends Module {
         .defaultValue(ShapeMode.Lines)
         .build()
     );
-    private final Setting <SettingColor> renderColor = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> renderColor = sgRender.add(new ColorSetting.Builder()
         .name("render-color")
         .description("Block render color.")
         .defaultValue(new SettingColor(255, 255, 255, 255))
         .build()
     );
-    private final Setting < Boolean > isLog = sgDebug.add(new BoolSetting.Builder()
+    private final Setting<Boolean> isLog = sgDebug.add(new BoolSetting.Builder()
         .name("enable-logs")
         .description("Show logs in chat.")
         .defaultValue(false)
@@ -102,32 +102,32 @@ public class AutoMap extends Module {
 
         ticks++;
         if (ticks % whatDelay.get() == 0) {
-        if (!mc.player.getAbilities().creativeMode && isGamemode.get()) {
-            this.toggle();
-            error("Disabled because player not in creative mode.");
-        }
-
-        int[] nextPoint = getNextPoint(mc.player.getBlockX(), mc.player.getBlockZ(), posOne.get().getX(), posOne.get().getZ(), posTwo.get().getX(), posTwo.get().getZ());
-
-        if (nextPoint != null) {
-            if(isDetectBlock.get()) {
-            if(BlockUtils.getPlaceSide(mc.player.getBlockPos().down()) != null) {
-                mc.player.updatePosition(nextPoint[0] + 0.5, mc.player.getY(), nextPoint[1] + 0.5);
+            if (!mc.player.getAbilities().creativeMode && isGamemode.get()) {
+                this.toggle();
+                error("Disabled because player not in creative mode.");
             }
+
+            int[] nextPoint = getNextPoint(mc.player.getBlockX(), mc.player.getBlockZ(), posOne.get().getX(), posOne.get().getZ(), posTwo.get().getX(), posTwo.get().getZ());
+
+            if (nextPoint != null) {
+                if(isDetectBlock.get()) {
+                    if(BlockUtils.getPlaceSide(mc.player.getBlockPos().down()) != null) {
+                        mc.player.updatePosition(nextPoint[0] + 0.5, mc.player.getY(), nextPoint[1] + 0.5);
+                    }
+                } else {
+                    mc.player.updatePosition(nextPoint[0] + 0.5, mc.player.getY(), nextPoint[1] + 0.5);
+                }
+                if(isLookAt.get()) {
+                    mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(mc.player.getX() , mc.player.getBlockY() , mc.player.getZ()));
+                }
             } else {
-                mc.player.updatePosition(nextPoint[0] + 0.5, mc.player.getY(), nextPoint[1] + 0.5);
+                if (isLog.get() && isAutoToggle.get()) {
+                    info("Cant find next block. toggled §coff§7.");
+                    this.toggle();
+                } else if (isAutoToggle.get()) {
+                    this.toggle();
+                }
             }
-            if(isLookAt.get()) {
-                mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(mc.player.getX() , mc.player.getBlockY() , mc.player.getZ()));
-            }
-        } else {
-            if (isLog.get() && isAutoToggle.get()) {
-                info("Cant find next block. toggled §coff§7.");
-                this.toggle();
-            } else if (isAutoToggle.get()) {
-                this.toggle();
-            }
-        }
         }
     }
     @EventHandler

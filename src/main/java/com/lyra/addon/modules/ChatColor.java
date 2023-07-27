@@ -2,79 +2,80 @@ package com.lyra.addon.modules;
 
 import com.lyra.addon.Addon;
 import meteordevelopment.meteorclient.events.game.SendMessageEvent;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.ColorSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import java.awt.Color;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.ColorSetting;
+
+import java.awt.*;
 
 public class ChatColor extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgExtra = settings.createGroup("Extra");
-    private final Setting < SettingColor > startColor = sgGeneral.add(new ColorSetting.Builder()
+
+    private final Setting<SettingColor> startColor = sgGeneral.add(new ColorSetting.Builder()
         .name("start-color")
         .description("The Gradient start color.")
         .defaultValue(new SettingColor(255, 255, 255, 255))
         .build()
     );
-    private final Setting < SettingColor > endColor = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> endColor = sgGeneral.add(new ColorSetting.Builder()
         .name("end-color")
         .description("The Gradient end color.")
         .defaultValue(new SettingColor(255, 255, 255, 255))
         .build()
     );
-    private final Setting < SettingColor > fallbackColor = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> fallbackColor = sgGeneral.add(new ColorSetting.Builder()
         .name("default-color")
         .description("A default color that gets used if the message is too big to send.")
         .defaultValue(new SettingColor(255, 255, 255, 255))
         .build()
     );
-    private final Setting < Boolean > isFallback = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> isFallback = sgGeneral.add(new BoolSetting.Builder()
         .name("enable-default")
         .description("Enable default color that only gets used if the message is too big to send or gradient is disabled.")
         .defaultValue(false)
         .build()
     );
-    private final Setting < Boolean > isGradient = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> isGradient = sgGeneral.add(new BoolSetting.Builder()
         .name("gradient")
         .description("Enable Gradient text style.")
         .defaultValue(false)
         .build()
     );
-    private final Setting < Boolean > isBold = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> isBold = sgGeneral.add(new BoolSetting.Builder()
         .name("bold")
         .description("Enable Bold text style.")
         .defaultValue(false)
         .build()
     );
-    private final Setting < Boolean > isObfuscated = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> isObfuscated = sgGeneral.add(new BoolSetting.Builder()
         .name("obfuscated")
         .description("Enable Obfuscated text style.")
         .defaultValue(false)
         .build()
     );
-    private final Setting < Boolean > isStrikethrough = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> isStrikethrough = sgGeneral.add(new BoolSetting.Builder()
         .name("strikethrough")
         .description("Enable Strikethrough text style.")
         .defaultValue(false)
         .build()
     );
-    private final Setting < Boolean > isUnderline = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> isUnderline = sgGeneral.add(new BoolSetting.Builder()
         .name("underline")
         .description("Enable Underline text style.")
         .defaultValue(false)
         .build()
     );
-    private final Setting < Boolean > isItalic = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> isItalic = sgGeneral.add(new BoolSetting.Builder()
         .name("italic")
         .description("Enable Italic text style.")
         .defaultValue(false)
         .build()
     );
-    private final Setting < Boolean > isEmojiAllow = sgExtra.add(new BoolSetting.Builder()
+    private final Setting<Boolean> isEmojiAllow = sgExtra.add(new BoolSetting.Builder()
         .name("emoji")
         .description("Allows you to use emojis with the : symbol.")
         .defaultValue(false)

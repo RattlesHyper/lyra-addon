@@ -21,9 +21,9 @@ public class SpectatorTeleport extends Module {
         .defaultValue(true)
         .build()
     );
-     public final Setting<String> beforeTp = sgCommands.add(new StringSetting.Builder()
+    public final Setting<String> beforeTp = sgCommands.add(new StringSetting.Builder()
         .name("before-tp")
-         .visible(enableBefore::get)
+        .visible(enableBefore::get)
         .description("The specified message sent to the server before sending Spectator Teleport packet.")
         .defaultValue("/gamemode spectator")
         .build()
