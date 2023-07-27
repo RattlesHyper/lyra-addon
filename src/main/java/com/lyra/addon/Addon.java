@@ -4,10 +4,9 @@ import com.lyra.addon.commands.*;
 import com.lyra.addon.modules.*;
 import com.mojang.logging.LogUtils;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
-import meteordevelopment.meteorclient.systems.commands.Commands;
+import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.movement.Scaffold;
 import org.slf4j.Logger;
 
 
@@ -23,20 +22,25 @@ public class Addon extends MeteorAddon {
         Modules.get().add(new ItemDropper());
         Modules.get().add(new RainbowArmor());
         Modules.get().add(new CommandAura());
-        Modules.get().add(new NBTGrabber());
         Modules.get().add(new ChatColor());
         Modules.get().add(new PacketScaffold());
         Modules.get().add(new AutoMap());
         Modules.get().add(new ForEach());
         Modules.get().add(new SpectatorTeleport());
+        Modules.get().add(new DisableTooltips());
+        Modules.get().add(new AutoClip());
+        Modules.get().add(new NoClearChat());
         Modules.get().add(new TpAura());
 
+
+
         // Commands
-        Commands.get().add(new StackCommand());
-        Commands.get().add(new ItemStealer());
-        Commands.get().add(new RenameCommand());
-        Commands.get().add(new SptpCommand());
-        Commands.get().add(new SummonCommand());
+        Commands.add(new StackCommand());
+        Commands.add(new StackCommand());
+        Commands.add(new ItemStealer());
+        Commands.add(new RenameCommand());
+        Commands.add(new SptpCommand());
+        Commands.add(new SummonCommand());
 
 
     }

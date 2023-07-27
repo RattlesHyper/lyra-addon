@@ -1,20 +1,32 @@
 package com.lyra.addon.modules;
 
 import com.lyra.addon.Addon;
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import meteordevelopment.meteorclient.commands.arguments.CompoundNbtTagArgumentType;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
+import net.minecraft.text.Text;
+
 import java.awt.*;
+import java.util.*;
+import java.util.List;
 
 public class RainbowArmor extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgHead = settings.createGroup("Head Settings");
     private final SettingGroup sgArmor = settings.createGroup("Armor Settings");
     private final Setting<RainbowMode> rainbowMODE = sgGeneral.add(new EnumSetting.Builder<RainbowMode>()
         .name("rainbow-mode")
@@ -25,7 +37,7 @@ public class RainbowArmor extends Module {
     private final Setting<Integer> speed = sgGeneral.add(new IntSetting.Builder()
         .name("speed")
         .description("WARNING: High speeds will cause a ton of lag and can easily crash the game!")
-        .defaultValue(1)
+        .defaultValue(5)
         .min(1)
         .sliderMax(30)
         .visible(() -> rainbowMODE.get() == RainbowMode.Math || rainbowMODE.get() == RainbowMode.Index)
@@ -53,24 +65,50 @@ public class RainbowArmor extends Module {
         .defaultValue(true)
         .build()
     );
-    private final Setting<Boolean> excludeHelmet = sgArmor.add(new BoolSetting.Builder()
-        .name("helmet")
-        .description("Disables Helmet.")
-        .defaultValue(true)
-        .onChanged(onChanged -> {
-            if(this.isActive()) {
-                mc.interactionManager.clickCreativeStack(Items.AIR.getDefaultStack(), 5); // Remove the helmet from the inventory
-            }
-        })
+    private final Setting<HeadMode> headMode = sgHead.add(new EnumSetting.Builder<HeadMode>()
+        .name("head-mode")
+        .description("Head item mode.")
+        .defaultValue(HeadMode.Normal)
         .build()
     );
+    private final Setting<Integer> headDelay = sgHead.add(new IntSetting.Builder()
+        .name("head-item-delay")
+        .description("Delay for head item.")
+        .defaultValue(2)
+        .min(1)
+        .sliderMax(20)
+        .visible(() -> headMode.get() == HeadMode.Custom)
+        .build()
+    );
+    private final Setting<java.util.List<Item>> items = sgHead.add(new ItemListSetting.Builder()
+        .name("items")
+        .description("Select items to be shown on head.")
+        .defaultValue(List.of())
+        .visible(() -> headMode.get() == HeadMode.Custom)
+        .build()
+    );
+    private final Setting<Boolean> isCustomNbt = sgHead.add(new BoolSetting.Builder()
+        .name("enable-custom-nbt")
+        .description("Enable custom NBT.")
+        .defaultValue(true)
+        .visible(() -> headMode.get() == HeadMode.Custom)
+        .build()
+    );
+    private final Setting<List<String>> customNbt = sgHead.add(new StringListSetting.Builder()
+        .name("custom-nbt")
+        .description("Custom NBT to set to the items.")
+        .defaultValue(List.of("{Enchantments:[{id:\"minecraft:aqua_affinity\",lvl:0s}]}"))
+        .visible(() -> headMode.get() == HeadMode.Custom && isCustomNbt.get())
+        .build()
+    );
+
     private final Setting<Boolean> excludeChest = sgArmor.add(new BoolSetting.Builder()
         .name("chestplate")
         .description("Disables Chestplate.")
         .defaultValue(true)
         .onChanged(onChanged -> {
             if(this.isActive()) {
-                mc.interactionManager.clickCreativeStack(Items.AIR.getDefaultStack(), 6); // Remove the helmet from the inventory
+                mc.interactionManager.clickCreativeStack(Items.AIR.getDefaultStack(), 6);
             }
         })
         .build()
@@ -81,7 +119,7 @@ public class RainbowArmor extends Module {
         .defaultValue(true)
         .onChanged(onChanged -> {
             if(this.isActive()) {
-                mc.interactionManager.clickCreativeStack(Items.AIR.getDefaultStack(), 7); // Remove the helmet from the inventory
+                mc.interactionManager.clickCreativeStack(Items.AIR.getDefaultStack(), 7);
             }
         })
         .build()
@@ -92,7 +130,7 @@ public class RainbowArmor extends Module {
         .defaultValue(true)
         .onChanged(onChanged -> {
             if(this.isActive()) {
-                mc.interactionManager.clickCreativeStack(Items.AIR.getDefaultStack(), 8); // Remove the helmet from the inventory
+                mc.interactionManager.clickCreativeStack(Items.AIR.getDefaultStack(), 8);
             }
         })
         .build()
@@ -101,8 +139,10 @@ public class RainbowArmor extends Module {
         super(Addon.CATEGORY, "rainbow-armor", "Gives you Rainbow Leather Armor with various modes.");
     }
 
+    private int ticks;
     boolean isIndex = false;
     boolean isHSB = false;
+    private int nbtI;
 
     @Override
     public void onActivate() {
@@ -110,34 +150,62 @@ public class RainbowArmor extends Module {
             error("Creative mode only.");
             this.toggle();
         }
-
+        nbtI = 0;
     }
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
         if (!toggleOnLog.get()) return;
-
         toggle();
     }
     @EventHandler
     private void onTick(TickEvent.Post event) {
-            if (excludeHelmet.get()) {
-                ItemStack helmet = new ItemStack(Items.LEATHER_HELMET);
-                setArmorColors(5, helmet);
+        ticks++;
+        if (headMode.get() == HeadMode.Normal) {
+            ItemStack armor = new ItemStack(Items.LEATHER_HELMET);
+            setArmorColors(5, armor);
+        }
+        if (headMode.get() == HeadMode.Custom) {
+            if (ticks % headDelay.get() == 0) {
+                setCustomHead();
             }
-            if (excludeChest.get()) {
-                ItemStack armor = new ItemStack(Items.LEATHER_CHESTPLATE);
-                setArmorColors(6, armor);
-            }
-            if (excludeLeggings.get()) {
-                ItemStack armor = new ItemStack(Items.LEATHER_LEGGINGS);
-                setArmorColors(7, armor);
-            }
-            if (excludeBoots.get()) {
-                ItemStack armor = new ItemStack(Items.LEATHER_BOOTS);
-                setArmorColors(8, armor);
+        }
+        if (excludeChest.get()) {
+            ItemStack armor = new ItemStack(Items.LEATHER_CHESTPLATE);
+            setArmorColors(6, armor);
+        }
+        if (excludeLeggings.get()) {
+            ItemStack armor = new ItemStack(Items.LEATHER_LEGGINGS);
+            setArmorColors(7, armor);
+        }
+        if (excludeBoots.get()) {
+            ItemStack armor = new ItemStack(Items.LEATHER_BOOTS);
+            setArmorColors(8, armor);
         }
     }
 
+    private void setCustomHead() {
+        List<Item> selectedItems = new ArrayList<>(items.get());
+        Collections.shuffle(selectedItems, new Random());
+        if (selectedItems.isEmpty()) return;
+        ItemStack itemStack = new ItemStack(selectedItems.get(0 % selectedItems.size()));
+
+        // Apply enchantments
+        if (!customNbt.get().isEmpty() && isCustomNbt.get()) {
+            if (nbtI >= customNbt.get().size()) nbtI = 0;
+            String nbt = customNbt.get().get(nbtI);
+            try {
+                if(!Objects.equals(nbt, "")) {
+                    itemStack.setNbt(new CompoundNbtTagArgumentType().parse(new StringReader(nbt)));
+                }
+            } catch (CommandSyntaxException e) {
+                throw new RuntimeException(e);
+            }
+            nbtI++;
+        }
+        CreativeInventoryActionC2SPacket packet = new CreativeInventoryActionC2SPacket(5, itemStack);
+        mc.player.networkHandler.sendPacket(packet);
+
+    }
     private void setArmorColors(int slot, ItemStack armor) {
         NbtCompound nbt = new NbtCompound();
         NbtCompound tag = nbt.getCompound("display");
@@ -356,7 +424,11 @@ public class RainbowArmor extends Module {
         Unique,
         Experimental,
     }
-
+    public enum HeadMode {
+        None,
+        Normal,
+        Custom,
+    }
     public enum RainbowMode {
         Math,
         Index,

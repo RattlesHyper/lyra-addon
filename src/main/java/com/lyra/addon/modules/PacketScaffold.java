@@ -54,7 +54,7 @@ public class PacketScaffold extends Module {
         .defaultValue(ShapeMode.Lines)
         .build()
     );
-    private final Setting < SettingColor > renderColor = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> renderColor = sgRender.add(new ColorSetting.Builder()
         .name("render-color")
         .description("Block render color.")
         .defaultValue(new SettingColor(255, 255, 255, 255))
@@ -76,7 +76,7 @@ public class PacketScaffold extends Module {
     }
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        BlockPos customPos = new BlockPos(mc.player.getPos().x, isYlock.get() ? ylock : mc.player.getY() -1, mc.player.getZ());
+        BlockPos customPos = new BlockPos((int) mc.player.getPos().x, (int) (isYlock.get() ? ylock : mc.player.getY() -1), (int) mc.player.getZ());
         Hand customHand = handMode.get();
         BlockHitResult customHitResult = new BlockHitResult(
             new Vec3d(customPos.getX(), customPos.getY(), customPos.getZ()),
@@ -90,7 +90,7 @@ public class PacketScaffold extends Module {
     @EventHandler
     private void onRender(Render3DEvent event) {
         if (showBox && isRender.get()) {
-        event.renderer.box(mc.player.getBlockX() +1, isYlock.get() ? ylock : mc.player.getBlockY() -1, mc.player.getBlockZ() + 1, mc.player.getBlockX() , isYlock.get() ? ylock +1 : mc.player.getBlockY(), mc.player.getBlockZ(), renderColor.get(), renderColor.get(), renderMode.get(), 0);
+            event.renderer.box(mc.player.getBlockX() +1, isYlock.get() ? ylock : mc.player.getBlockY() -1, mc.player.getBlockZ() + 1, mc.player.getBlockX() , isYlock.get() ? ylock +1 : mc.player.getBlockY(), mc.player.getBlockZ(), renderColor.get(), renderColor.get(), renderMode.get(), 0);
         } else event.renderer.end();
     }
 

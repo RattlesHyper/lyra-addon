@@ -17,18 +17,21 @@
 - Download the latest [release](/../../releases) of the mod from the releases tab.
 - Put it in your `.minecraft/mods` folder where you have installed Meteor.
 
-*Note: It is recommended to use the Release 0.5.2 [1.19.3] version of meteor while using Lyra-Addon*
+*Note: It is recommended to use the Release 0.5.4 [1.20] version of meteor while using Lyra-Addon*
 
 ## Modules
 
+- **[AutoClip](#autoclip)**
 - **[AutoMap](#automap)**
-- **[ChatColor](#chatcolor)** 
-- **[CommandAura](#commandaura)** 
+- **[ChatColor](#chatcolor)**
+- **[CommandAura](#commandaura)**
 - **[ForEach](#foreach)**
-- **[ItemDropper](#itemdropper)** 
-- **[NBTGrabber](#nbtgrabber)**
-- **[PacketScaffold](#packetscaffold)** 
+- **[ItemDropper](#itemdropper)**
+- **[NoChatClear](#nochatclear)**
+- **[PacketScaffold](#packetscaffold)**
 - **[RainbowArmor](#rainbowarmor)**
+- **[DisableTooltips](#disabletooltips)**
+- **[TpAuta](#tpaura)**
 
 ## Commands
 
@@ -83,10 +86,8 @@ Generates selected items and drops them from your inventory.
 
 <hr />
 
-## NBTGrabber
-Generates selected items and shows them in the chat.
-
-![](https://cdn.discordapp.com/attachments/937393739490537493/1116073308727812126/image.png)
+## NoChatClear
+It disables the method servers try to clear your chat.
 
 <hr />
 
@@ -100,4 +101,14 @@ Sends Right Click packet to the server.
 ## RainbowArmor
 Gives you Rainbow Leather Armor with various modes.
 
-![](https://cdn.discordapp.com/attachments/937393739490537493/1116074128424841236/image.png)
+![](https://cdn.discordapp.com/attachments/937393739490537493/1134086384483831848/image.png)
+<hr />
+
+## TpAura
+Teleports to target to increase range on KillAura.
+
+![](https://cdn.discordapp.com/attachments/937393739490537493/1134086751619645470/image.png)
+<hr />
+
+## DisableTooltips
+Replaces all tooltips with custom name.

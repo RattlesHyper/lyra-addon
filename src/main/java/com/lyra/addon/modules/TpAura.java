@@ -2,7 +2,6 @@ package com.lyra.addon.modules;
 
 import baritone.api.BaritoneAPI;
 import com.lyra.addon.Addon;
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -24,7 +23,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Tameable;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.entity.mob.ZombifiedPiglinEntity;
 import net.minecraft.entity.passive.AnimalEntity;
@@ -33,15 +31,16 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.SwordItem;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class TpAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -76,7 +75,7 @@ public class TpAura extends Module {
     private final Setting<RotationMode> rotation = sgGeneral.add(new EnumSetting.Builder<RotationMode>()
         .name("rotate")
         .description("Determines when you should rotate towards the target.")
-        .defaultValue(RotationMode.Always)
+        .defaultValue(RotationMode.None)
         .build()
     );
 
@@ -120,7 +119,7 @@ public class TpAura extends Module {
     );
 
 
-    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgTargeting.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> entities = sgTargeting.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Entities to attack.")
         .onlyAttackable()
@@ -130,6 +129,14 @@ public class TpAura extends Module {
     private final Setting<Double> range = sgTargeting.add(new DoubleSetting.Builder()
         .name("range")
         .description("The maximum range the entity can be to attack it.")
+        .defaultValue(6)
+        .min(0)
+        .sliderMax(20)
+        .build()
+    );
+    private final Setting<Double> stepSize = sgTargeting.add(new DoubleSetting.Builder()
+        .name("step-size")
+        .description("Blocks to travel every step to the target.")
         .defaultValue(6)
         .min(0)
         .sliderMax(10)
@@ -172,13 +179,6 @@ public class TpAura extends Module {
         .name("nametagged")
         .description("Whether or not to attack mobs with a name tag.")
         .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Boolean> ignoreShield = sgGeneral.add(new BoolSetting.Builder()
-        .name("ignore-shield")
-        .description("Attacks only if the blow is not blocked by a shield.")
-        .defaultValue(true)
         .build()
     );
 
@@ -317,7 +317,7 @@ public class TpAura extends Module {
         if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
         if (noRightClick.get() && (mc.interactionManager.isBreakingBlock() || mc.player.isUsingItem())) return false;
         if (!PlayerUtils.isWithin(entity, range.get())) return false;
-        if (!entities.get().getBoolean(entity.getType())) return false;
+        if (!entities.get().contains(entity.getType())) return false;
         if (!nametagged.get() && entity.hasCustomName()) return false;
         if (!PlayerUtils.canSeeEntity(entity) && !PlayerUtils.isWithin(entity, wallsRange.get())) return false;
         if (ignoreTamed.get()) {
@@ -334,7 +334,6 @@ public class TpAura extends Module {
         if (entity instanceof PlayerEntity player) {
             if (player.isCreative()) return false;
             if (!Friends.get().shouldAttack(player)) return false;
-            if (ignoreShield.get() && player.blockedByShield(DamageSource.player(mc.player))) return false;
         }
         return !(entity instanceof AnimalEntity animal) || babies.get() || !animal.isBaby();
     }
@@ -365,22 +364,41 @@ public class TpAura extends Module {
     }
 
     private void hitEntity(Entity target) {
+        findPath(mc.player.getX(), mc.player.getY(), mc.player.getZ(), target.getX(), target.getY(), target.getZ());
+        mc.interactionManager.attackEntity(mc.player, target);
+        mc.player.swingHand(Hand.MAIN_HAND);
+        findPath(target.getX(), target.getY(), target.getZ(), mc.player.getX(), mc.player.getY(), mc.player.getZ());
+    }
 
-        new Thread(() -> {
-            Vec3d oldPos = new Vec3d(mc.player.getX(), mc.player.getY(), mc.player.getZ());
+    private void findPath(double x1, double y1, double z1, double x2, double y2, double z2) {
 
-            mc.player.updatePosition(target.getX(), target.getY(), target.getZ());
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            mc.interactionManager.attackEntity(mc.player, target);
-            mc.player.swingHand(Hand.MAIN_HAND);
+        double distance = calculateDistance(x1, y1, z1, x2, y2, z2);
 
-            mc.player.updatePosition(oldPos.getX(), oldPos.getY(), oldPos.getZ());
-        }).start();
+        int totalSteps = (int) Math.ceil(distance / stepSize.get());
 
+        double dx = (x2 - x1) / totalSteps;
+        double dy = (y2 - y1) / totalSteps;
+        double dz = (z2 - z1) / totalSteps;
+
+        for (int i = 0; i < totalSteps; i++) {
+            double currentX = x1 + i * dx;
+            double currentY = y1 + i * dy;
+            double currentZ = z1 + i * dz;
+
+            tpPacket(currentX, currentY, currentZ);
+        }
+    }
+
+    public static double calculateDistance(double x1, double y1, double z1, double x2, double y2, double z2) {
+        double dx = x2 - x1;
+        double dy = y2 - y1;
+        double dz = z2 - z1;
+
+        return Math.sqrt(dx * dx + dy * dy + dz * dz);
+    }
+
+    private void tpPacket(double x, double y, double z) {
+        mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(x, y, z, true));
     }
 
     private void rotate(Entity target, Runnable callback) {
