@@ -31,8 +31,7 @@ public class Addon extends MeteorAddon {
         Modules.get().add(new AutoClip());
         Modules.get().add(new NoClearChat());
         Modules.get().add(new TpAura());
-
-
+        LOG.info("Added modules");
 
         // Commands
         Commands.add(new StackCommand());
@@ -41,8 +40,7 @@ public class Addon extends MeteorAddon {
         Commands.add(new RenameCommand());
         Commands.add(new SptpCommand());
         Commands.add(new SummonCommand());
-
-
+        LOG.info("Added commands");
     }
 
     @Override
