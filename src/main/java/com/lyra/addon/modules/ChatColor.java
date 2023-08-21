@@ -10,21 +10,30 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.ColorSetting;
 
 import java.awt.*;
+import java.util.Random;
 
 public class ChatColor extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgExtra = settings.createGroup("Extra");
 
+    private final Setting<Mode> styleMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+        .name("color-mode")
+        .description("Chat color style mode.")
+        .defaultValue(Mode.Normal)
+        .build()
+    );
     private final Setting<SettingColor> startColor = sgGeneral.add(new ColorSetting.Builder()
         .name("start-color")
         .description("The Gradient start color.")
         .defaultValue(new SettingColor(255, 255, 255, 255))
+        .visible(() -> styleMode.get() == Mode.Gradient)
         .build()
     );
     private final Setting<SettingColor> endColor = sgGeneral.add(new ColorSetting.Builder()
         .name("end-color")
         .description("The Gradient end color.")
         .defaultValue(new SettingColor(255, 255, 255, 255))
+        .visible(() -> styleMode.get() == Mode.Gradient)
         .build()
     );
     private final Setting<SettingColor> fallbackColor = sgGeneral.add(new ColorSetting.Builder()
@@ -33,18 +42,7 @@ public class ChatColor extends Module {
         .defaultValue(new SettingColor(255, 255, 255, 255))
         .build()
     );
-    private final Setting<Boolean> isFallback = sgGeneral.add(new BoolSetting.Builder()
-        .name("enable-default")
-        .description("Enable default color that only gets used if the message is too big to send or gradient is disabled.")
-        .defaultValue(false)
-        .build()
-    );
-    private final Setting<Boolean> isGradient = sgGeneral.add(new BoolSetting.Builder()
-        .name("gradient")
-        .description("Enable Gradient text style.")
-        .defaultValue(false)
-        .build()
-    );
+
     private final Setting<Boolean> isBold = sgGeneral.add(new BoolSetting.Builder()
         .name("bold")
         .description("Enable Bold text style.")
@@ -83,85 +81,96 @@ public class ChatColor extends Module {
     );
 
     public ChatColor() {
-        super(Addon.CATEGORY, "chat-color", "Better chat colors and style formatting.");
+        super(Addon.CATEGORY, "chat-color", "Better chat colors and style formatting. For servers with ChatColor2 plugin.");
     }
 
-    private String generateGradientText(String text, String startColor, String endColor) {
+    private String generateGradientText(String text) {
         int gradientSteps = text.length();
-        Color[] gradient = generateGradient(startColor, endColor, gradientSteps);
+        String[] gradient = generateGradient(gradientSteps);
 
         StringBuilder gradientText = new StringBuilder();
         boolean isInsideEmoji = false;
-        for (int i = 0; i < text.length(); i++) {
-            char c = text.charAt(i);
-            Color color = gradient[i];
-            String hexColor = String.format("#%06X", color.getRGB() & 0xFFFFFF);
 
-            if (c == ':' && !isInsideEmoji && isEmojiAllow.get()) {
-                gradientText.append(isGradient.get() ? "&" + hexColor : "").append(isBold.get() ? "&l" : "").append(isObfuscated.get() ? "&k" : "").append(isStrikethrough.get() ? "&m" : "").append(isUnderline.get() ? "&n" : "").append(isItalic.get() ? "&o" : "").append(c);
-                isInsideEmoji = true;
-            } else if (isInsideEmoji && c == ':' && isEmojiAllow.get()) {
+        for (int i = 0; i < gradientSteps; i++) {
+            char c = text.charAt(i);
+            String addHex = (!isInsideEmoji ? "&" + gradient[i] : "");
+            String addChar = "&" + getRandom();
+            if(c == ' ') {
                 gradientText.append(c);
-                isInsideEmoji = false;
-            } else if (isInsideEmoji || isEmoji(c) || c == ' ') {
+            } else if (c == ':' && isEmojiAllow.get()) {
+                gradientText.append("&").append(getHex(fallbackColor.get().r, fallbackColor.get().g, fallbackColor.get().b)).append(c);
+                isInsideEmoji = !isInsideEmoji;
+            } else if (isInsideEmoji && isEmojiAllow.get()) {
                 gradientText.append(c);
-            }
-            else {
-                gradientText.append(isGradient.get() ? "&" + hexColor : "").append(isBold.get() ? "&l" : "").append(isObfuscated.get() ? "&k" : "").append(isStrikethrough.get() ? "&m" : "").append(isUnderline.get() ? "&n" : "").append(isItalic.get() ? "&o" : "").append(c);
+            } else {
+                gradientText.append(styleMode.get() == Mode.Rainbow ? addChar : "").append(styleMode.get() == Mode.Gradient ? addHex : "").append(textFormatting(String.valueOf(c), false));
             }
         }
-
         return gradientText.toString();
     }
 
-    private boolean isEmoji(char c) {
-        int type = Character.getType(c);
-        return type == Character.SURROGATE || type == Character.OTHER_SYMBOL;
-    }
+    private String[] generateGradient(int steps) {
 
-    private Color[] generateGradient(String startColor, String endColor, int steps) {
-        Color start = Color.decode(startColor);
-        Color end = Color.decode(endColor);
+        String[] gradient = new String[steps];
 
-        Color[] gradient = new Color[steps];
-
-        int redDiff = end.getRed() - start.getRed();
-        int greenDiff = end.getGreen() - start.getGreen();
-        int blueDiff = end.getBlue() - start.getBlue();
+        int redDiff = endColor.get().r - startColor.get().r;
+        int greenDiff = endColor.get().g - startColor.get().g;
+        int blueDiff = endColor.get().b - startColor.get().b;
 
         float redStep = (float) redDiff / (steps - 1);
         float greenStep = (float) greenDiff / (steps - 1);
         float blueStep = (float) blueDiff / (steps - 1);
 
         for (int i = 0; i < steps; i++) {
-            int red = start.getRed() + (int)(redStep * i);
-            int green = start.getGreen() + (int)(greenStep * i);
-            int blue = start.getBlue() + (int)(blueStep * i);
+            int red = startColor.get().r + (int)(redStep * i);
+            int green = startColor.get().g + (int)(greenStep * i);
+            int blue = startColor.get().b + (int)(blueStep * i);
 
-            gradient[i] = new Color(red, green, blue);
+            gradient[i] = getHex(red, green, blue);
         }
 
         return gradient;
     }
-    private String getColor(String red, String green, String blue) {
-        return String.format("#%06X", (0xFFFFFF & new Color(Integer.parseInt(red), Integer.parseInt(green), Integer.parseInt(blue)).getRGB()));
+    private String textFormatting(String text, boolean color) {
+        return (color ? "&" + getHex(fallbackColor.get().r, fallbackColor.get().g, fallbackColor.get().b) : "")
+            + (isBold.get() ? "&l" : "")
+            + (isObfuscated.get() ? "&k" : "")
+            + (isStrikethrough.get() ? "&m" : "")
+            + (isUnderline.get() ? "&n" : "")
+            + (isItalic.get() ? "&o" : "")
+            + text;
     }
+    private char getRandom() {
+        char[] CHARACTERS = "0123456789abcdef".toCharArray();
+        Random random = new Random();
+        int randomIndex = random.nextInt(CHARACTERS.length);
+        return CHARACTERS[randomIndex];
+    }
+    private String getHex(int r, int g, int b) {
+        return String.format("#%06X", new Color(r, g, b).getRGB() & 0xFFFFFF);
+    }
+
     @EventHandler
     private void onMessageSend(SendMessageEvent event) {
         String message = event.message;
-        StringBuilder defaultText = new StringBuilder();
-        String[] color = startColor.toString().split(" "), color2 = endColor.   toString().split(" "), color3 = fallbackColor.toString().split(" ");
-        if (isGradient.get()) {
-            message = generateGradientText(message, getColor(color[0], color[1], color[2]), getColor(color2[0], color2[1], color2[2]));
+
+        if (styleMode.get() == Mode.Gradient || styleMode.get() == Mode.Rainbow) {
+            message = generateGradientText(event.message);
         }
-        if (!isGradient.get() || message.length() > 256) {
-            defaultText.append(isFallback.get() ? "&" + getColor(color3[0], color3[1], color3[2]) : "").append(isBold.get() ? "&l" : "").append(isObfuscated.get() ? "&k" : "").append(isStrikethrough.get() ? "&m" : "").append(isUnderline.get() ? "&n" : "").append(isItalic.get() ? "&o" : "").append(event.message);
-            message = defaultText.toString();
+
+        if (styleMode.get() == Mode.Normal || message.length() > 256) {
+            message = textFormatting(event.message, true);
         }
-        if (defaultText.length() > 256) {
+
+        if (message.length() > 256) {
             message = event.message;
         }
 
         event.message = message;
+    }
+    public enum Mode {
+        Normal,
+        Rainbow,
+        Gradient,
     }
 }

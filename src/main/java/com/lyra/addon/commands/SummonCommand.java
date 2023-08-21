@@ -50,7 +50,7 @@ public class SummonCommand extends Command {
     }
 
     private void placeItem() {
-        BlockPos customPos = new BlockPos(mc.player.getBlockX(), mc.player.getBlockY() -1, mc.player.getBlockZ());
+        BlockPos customPos = new BlockPos(mc.player.getBlockPos().offset(Direction.DOWN));
         BlockHitResult customHitResult = new BlockHitResult(
             new Vec3d(customPos.getX(), customPos.getY(), customPos.getZ()),
             Direction.UP,

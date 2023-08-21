@@ -95,7 +95,7 @@ public class ForEach extends Module {
     public void printPlayerNamesWithDelay() {
         stopFlag = false;
 
-        List < String > playerNamesList = mc.player.networkHandler.getPlayerList().stream()
+        List <String> playerNamesList = mc.player.networkHandler.getPlayerList().stream()
             .map(PlayerListEntry::getProfile)
             .map(GameProfile::getName)
             .toList();

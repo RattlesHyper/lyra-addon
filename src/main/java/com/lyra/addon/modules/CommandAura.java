@@ -2,12 +2,9 @@ package com.lyra.addon.modules;
 
 import com.lyra.addon.Addon;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.events.entity.EntityAddedEvent;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
-import meteordevelopment.meteorclient.settings.StringSetting;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
@@ -27,11 +24,10 @@ public class CommandAura extends Module {
         .defaultValue("/msg %player% hi")
         .build()
     );
-
-    private final Setting<Boolean> ignoreFriends = sgGeneral.add(new BoolSetting.Builder()
-        .name("ignore-friends")
-        .description("Will not send any messages to people friended.")
-        .defaultValue(false)
+    private final Setting<Target> targetMode = sgGeneral.add(new EnumSetting.Builder<Target>()
+        .name("target")
+        .description("Only targets selected target.")
+        .defaultValue(Target.Everyone)
         .build()
     );
     private final Setting<Boolean> toggleOnDeath = sgGeneral.add(new BoolSetting.Builder()
@@ -76,16 +72,32 @@ public class CommandAura extends Module {
     @EventHandler
     private void onEntityAdded(EntityAddedEvent event) {
         if (!(event.entity instanceof PlayerEntity) || event.entity.getUuid().equals(mc.player.getUuid())) return;
-        if (!ignoreFriends.get() || (ignoreFriends.get() && !Friends.get().isFriend((PlayerEntity)event.entity))) {
-            String msg = message.get().replaceAll("%player%", event.entity.getEntityName());
-            boolean isMatch = Pattern.matches(regex, event.entity.getEntityName());
-            if(isMatch) {
-                if(isLogs.get()) {
-                    info("Used command on §a" + event.entity.getEntityName() + "§7.");
-                }
-                ChatUtils.sendPlayerMsg(msg);
+        if (!Pattern.matches(regex, event.entity.getEntityName())) return;
+        String msg = message.get().replaceAll("%player%", event.entity.getEntityName());
+
+        if (targetMode.get() == Target.Everyone) {
+            ChatUtils.sendPlayerMsg(msg);
+            if(isLogs.get()) {
+                info("Used command on §a" + event.entity.getEntityName() + "§7.");
             }
         }
+        if (targetMode.get() == Target.OnlyFriends && Friends.get().isFriend((PlayerEntity)event.entity)) {
+            ChatUtils.sendPlayerMsg(msg);
+            if(isLogs.get()) {
+                info("Used command on §a" + event.entity.getEntityName() + "§7.");
+            }
+        }
+        if (targetMode.get() == Target.IgnoreFriends && !Friends.get().isFriend((PlayerEntity)event.entity)) {
+            ChatUtils.sendPlayerMsg(msg);
+            if(isLogs.get()) {
+                info("Used command on §a" + event.entity.getEntityName() + "§7.");
+            }
+        }
+    }
+    public enum Target {
+        Everyone,
+        OnlyFriends,
+        IgnoreFriends
     }
 
 }

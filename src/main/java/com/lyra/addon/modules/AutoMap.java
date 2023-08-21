@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
@@ -56,6 +57,12 @@ public class AutoMap extends Module {
     private final Setting<Boolean> isGamemode = sgGeneral.add(new BoolSetting.Builder()
         .name("detect-game-mode")
         .description("Disables the module when you're not in creative.")
+        .defaultValue(false)
+        .build()
+    );
+    private final Setting<Boolean> isFakeSwing = sgGeneral.add(new BoolSetting.Builder()
+        .name("fake-swing")
+        .description("Swings hand to make it look legit.")
         .defaultValue(false)
         .build()
     );
@@ -110,6 +117,9 @@ public class AutoMap extends Module {
             int[] nextPoint = getNextPoint(mc.player.getBlockX(), mc.player.getBlockZ(), posOne.get().getX(), posOne.get().getZ(), posTwo.get().getX(), posTwo.get().getZ());
 
             if (nextPoint != null) {
+                if (isFakeSwing.get()) {
+                    mc.player.swingHand(Hand.MAIN_HAND);
+                }
                 if(isDetectBlock.get()) {
                     if(BlockUtils.getPlaceSide(mc.player.getBlockPos().down()) != null) {
                         mc.player.updatePosition(nextPoint[0] + 0.5, mc.player.getY(), nextPoint[1] + 0.5);

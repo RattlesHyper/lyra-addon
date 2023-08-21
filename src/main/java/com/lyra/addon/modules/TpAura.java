@@ -1,6 +1,5 @@
 package com.lyra.addon.modules;
 
-import baritone.api.BaritoneAPI;
 import com.lyra.addon.Addon;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
@@ -13,8 +12,6 @@ import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.Target;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
-import meteordevelopment.meteorclient.utils.player.FindItemResult;
-import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -28,9 +25,6 @@ import net.minecraft.entity.mob.ZombifiedPiglinEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.AxeItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.Hand;
@@ -50,74 +44,18 @@ public class TpAura extends Module {
 
     // General
 
-    private final Setting<Weapon> weapon = sgGeneral.add(new EnumSetting.Builder<Weapon>()
-        .name("weapon")
-        .description("Only attacks an entity when a specified weapon is in your hand.")
-        .defaultValue(Weapon.Any)
-        .build()
-    );
-
-    private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
-        .name("auto-switch")
-        .description("Switches to your selected weapon when attacking the target.")
-        .defaultValue(false)
-        .build()
-    );
-
     private final Setting<Boolean> onlyOnClick = sgGeneral.add(new BoolSetting.Builder()
         .name("only-on-click")
         .description("Only attacks when holding left click.")
-        .defaultValue(false)
-        .build()
-    );
-
-
-    private final Setting<RotationMode> rotation = sgGeneral.add(new EnumSetting.Builder<RotationMode>()
-        .name("rotate")
-        .description("Determines when you should rotate towards the target.")
-        .defaultValue(RotationMode.None)
-        .build()
-    );
-
-    private final Setting<Double> hitChance = sgGeneral.add(new DoubleSetting.Builder()
-        .name("hit-chance")
-        .description("The probability of your hits landing.")
-        .defaultValue(100)
-        .range(1, 100)
-        .sliderRange(1, 100)
-        .build()
-    );
-
-    private final Setting<Boolean> pauseOnCombat = sgGeneral.add(new BoolSetting.Builder()
-        .name("pause-on-combat")
-        .description("Freezes Baritone temporarily until you are finished attacking the entity.")
         .defaultValue(true)
         .build()
     );
-
     private final Setting<Boolean> noRightClick = sgGeneral.add(new BoolSetting.Builder()
         .name("pause-on-use")
         .description("Does not attack if using an item.")
-        .defaultValue(true)
-        .build()
-    );
-
-    // Targeting
-
-    private final Setting<Boolean> ignorePassive = sgGeneral.add(new BoolSetting.Builder()
-        .name("ignore-passive")
-        .description("Will only attack sometimes passive mobs if they are targeting you.")
-        .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<Boolean> ignoreTamed = sgGeneral.add(new BoolSetting.Builder()
-        .name("ignore-tamed")
-        .description("Will avoid attacking mobs you tamed.")
         .defaultValue(false)
         .build()
     );
-
 
     private final Setting<Set<EntityType<?>>> entities = sgTargeting.add(new EntityTypeListSetting.Builder()
         .name("entities")
@@ -257,45 +195,8 @@ public class TpAura extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (!mc.player.isAlive() || PlayerUtils.getGameMode() == GameMode.SPECTATOR) return;
-
         TargetUtils.getList(targets, this::entityCheck, priority.get(), maxTargets.get());
-
-        if (targets.isEmpty()) {
-            if (wasPathing) {
-                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
-                wasPathing = false;
-            }
-            return;
-        }
-
-        if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
-            wasPathing = true;
-        }
-
-        Entity primary = targets.get(0);
-
-        if (rotation.get() == RotationMode.Always) rotate(primary, null);
-
         if (onlyOnClick.get() && !mc.options.attackKey.isPressed()) return;
-
-
-        if (autoSwitch.get()) {
-            FindItemResult weaponResult = InvUtils.findInHotbar(itemStack -> {
-                Item item = itemStack.getItem();
-
-                return switch (weapon.get()) {
-                    case Axe -> item instanceof AxeItem;
-                    case Sword -> item instanceof SwordItem;
-                    case Both -> item instanceof AxeItem || item instanceof SwordItem;
-                    default -> true;
-                };
-            });
-
-            InvUtils.swap(weaponResult.slot(), false);
-        }
-
-        if (!itemInHand()) return;
 
         if (delayCheck()) targets.forEach(this::attack);
 
@@ -320,17 +221,7 @@ public class TpAura extends Module {
         if (!entities.get().contains(entity.getType())) return false;
         if (!nametagged.get() && entity.hasCustomName()) return false;
         if (!PlayerUtils.canSeeEntity(entity) && !PlayerUtils.isWithin(entity, wallsRange.get())) return false;
-        if (ignoreTamed.get()) {
-            if (entity instanceof Tameable tameable
-                && tameable.getOwnerUuid() != null
-                && tameable.getOwnerUuid().equals(mc.player.getUuid())
-            ) return false;
-        }
-        if (ignorePassive.get()) {
-            if (entity instanceof EndermanEntity enderman && !enderman.isAngryAt(mc.player)) return false;
-            if (entity instanceof ZombifiedPiglinEntity piglin && !piglin.isAngryAt(mc.player)) return false;
-            if (entity instanceof WolfEntity wolf && !wolf.isAttacking()) return false;
-        }
+
         if (entity instanceof PlayerEntity player) {
             if (player.isCreative()) return false;
             if (!Friends.get().shouldAttack(player)) return false;
@@ -357,10 +248,7 @@ public class TpAura extends Module {
     }
 
     private void attack(Entity target) {
-        if (Math.random() > hitChance.get() / 100) return;
-
-        if (rotation.get() == RotationMode.OnHit) rotate(target, () -> hitEntity(target));
-        else hitEntity(target);
+        hitEntity(target);
     }
 
     private void hitEntity(Entity target) {
@@ -405,15 +293,6 @@ public class TpAura extends Module {
         Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, Target.Body), callback);
     }
 
-    private boolean itemInHand() {
-        return switch (weapon.get()) {
-            case Axe -> mc.player.getMainHandStack().getItem() instanceof AxeItem;
-            case Sword -> mc.player.getMainHandStack().getItem() instanceof SwordItem;
-            case Both -> mc.player.getMainHandStack().getItem() instanceof AxeItem || mc.player.getMainHandStack().getItem() instanceof SwordItem;
-            default -> true;
-        };
-    }
-
     public Entity getTarget() {
         if (!targets.isEmpty()) return targets.get(0);
         return null;
@@ -443,16 +322,4 @@ public class TpAura extends Module {
         event.renderer.box(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, renderColor.get(), renderColor.get(), ShapeMode.Lines, 0);
     }
 
-    public enum Weapon {
-        Sword,
-        Axe,
-        Both,
-        Any
-    }
-
-    public enum RotationMode {
-        Always,
-        OnHit,
-        None
-    }
 }

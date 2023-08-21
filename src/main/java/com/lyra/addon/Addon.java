@@ -31,6 +31,7 @@ public class Addon extends MeteorAddon {
         Modules.get().add(new AutoClip());
         Modules.get().add(new NoClearChat());
         Modules.get().add(new TpAura());
+        Modules.get().add(new JoinMessage());
 
 
 

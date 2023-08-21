@@ -30,24 +30,22 @@ public class AutoClip extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (!mc.player.horizontalCollision) return;
-        int tries = 0;
-        for (int i = 0; i < horizontalRange.get(); i++) {
-            tries++;
+        Vec3d playerPos = new Vec3d(mc.player.getX(), mc.player.getY(), mc.player.getZ());
+
+        for (int i = 2; i < horizontalRange.get(); i++) {
             Vec3d forward = Vec3d.fromPolar(0, mc.player.getYaw()).normalize();
+            Vec3d pos = new Vec3d(playerPos.getX() + forward.x * i, playerPos.getY(), playerPos.getZ() + forward.z * i);
 
-            Vec3d pos = new Vec3d(mc.player.getX() + forward.x * tries, mc.player.getY(), mc.player.getZ() + forward.z * tries);
-            Block blockFront = checkBlock(mc.player.getX() + forward.x * 1, mc.player.getY(), mc.player.getZ() + forward.z * 1);
-            Block block1 = checkBlock(pos.getX(), mc.player.getY() + 1, pos.getZ());
-            Block block = checkBlock(pos.getX(), mc.player.getY(), pos.getZ());
+            Block f1 = checkBlock(pos.getX(), pos.getY(), pos.getZ());
+            Block fu = checkBlock(pos.getX(), pos.getY() + 1, pos.getZ());
 
-            if (block == Blocks.AIR && block1 == Blocks.AIR && blockFront != Blocks.AIR) {
+            if (f1 == Blocks.AIR && fu == Blocks.AIR) {
                 mc.player.setPosition(pos);
                 break;
             }
         }
     }
     private Block checkBlock(double x, double y, double z) {
-        Block block = mc.world.getBlockState(new BlockPos(new Vec3i((int) x, (int) y, (int) z))).getBlock();
-        return block;
+        return mc.world.getBlockState(new BlockPos(new Vec3i((int) x, (int) y, (int) z))).getBlock();
     }
 }
