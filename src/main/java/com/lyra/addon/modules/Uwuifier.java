@@ -1,13 +1,10 @@
 package com.lyra.addon.modules;
 
 import com.lyra.addon.Addon;
+import com.lyra.utils.Uwuify;
 import meteordevelopment.meteorclient.events.game.SendMessageEvent;
-import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.ColorSetting;
 
 import java.awt.*;
 import java.util.Random;
