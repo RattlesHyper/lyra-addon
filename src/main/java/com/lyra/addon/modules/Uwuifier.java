@@ -1,7 +1,7 @@
 package com.lyra.addon.modules;
 
 import com.lyra.addon.Addon;
-import com.lyra.utils.Uwuify;
+import com.lyra.addon.utils.Uwuify;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.events.game.SendMessageEvent;
 import meteordevelopment.meteorclient.systems.modules.Module;
