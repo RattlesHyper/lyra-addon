@@ -15,7 +15,7 @@ public class Uwuify {
 			" \uD83D\uDE33\uD83D\uDE33\uD83D\uDE33", " (\u273Fo\u03C9o)", " /(^•\u03C9•^)", "^•\uFECC•^ ",
 			"(ˆ \uFECC ˆ)\u2661 ", " rawrrr", };
 
-	public static String uwuify(String message) {
+	public static String uwuify(String message, boolean addEmoji) {
 		int currentIndex = 0;
 		StringBuilder stringBuilder = new StringBuilder();
 		Random random = new Random();
@@ -45,8 +45,8 @@ public class Uwuify {
 			}
 		}
 
-		if (random.nextFloat() <= .9f)
-			stringBuilder.append(" " + emojiArray[random.nextInt(emojiArray.length)]);
+		if (addEmoji)
+			stringBuilder.append(emojiArray[random.nextInt(emojiArray.length)]);
 
 		return stringBuilder.toString().toLowerCase();
 	}
