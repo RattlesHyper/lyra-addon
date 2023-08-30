@@ -17,7 +17,7 @@
 - Download the latest [release](/../../releases) of the mod from the releases tab.
 - Put it in your `.minecraft/mods` folder where you have installed Meteor.
 
-*Note: It is recommended to use the Release 0.5.4 [1.20] version of meteor while using Lyra-Addon*
+*Note: It is recommended to use the Release 0.5.4 [1.20-1.20.1] version of meteor while using Lyra-Addon*
 
 ## Modules
 
@@ -27,11 +27,14 @@
 - **[CommandAura](#commandaura)**
 - **[ForEach](#foreach)**
 - **[ItemDropper](#itemdropper)**
+- **[JoinMessage](#joinmessage)** 
 - **[NoChatClear](#nochatclear)**
 - **[PacketScaffold](#packetscaffold)**
 - **[RainbowArmor](#rainbowarmor)**
 - **[DisableTooltips](#disabletooltips)**
-- **[TpAuta](#tpaura)**
+- **[TpAura](#tpaura)**
+- **[TpMine](#tpaura)**
+- **[Uwuifier](#uwuifier)**
 
 ## Commands
 
@@ -53,11 +56,11 @@ Helps you build 2d schematics by moving over all the blocks from start position 
 <hr />
 
 ## ChatColor
-Better chat colors and style formatting. for the servers that support it.
+Better chat colors and style formatting. for the servers that support it. Servers with Chatcolor2 plugin.
 
 ![](https://cdn.discordapp.com/attachments/937393739490537493/1116070696133607474/image.png)
 
-![](https://cdn.discordapp.com/attachments/937393739490537493/1116069789530591293/image.png)
+![](https://cdn.discordapp.com/attachments/937393739490537493/1145952727122329670/image.png)
 
 <hr />
 
@@ -86,13 +89,20 @@ Generates selected items and drops them from your inventory.
 
 <hr />
 
+## JoinMessage
+Runs command when you spawn in a server. Put (me) to put username automatically.
+
+![](https://cdn.discordapp.com/attachments/937393739490537493/1143089914989269012/image.png)
+
+<hr />
+
 ## NoChatClear
 It disables the method servers try to clear your chat.
 
 <hr />
 
 ## PacketScaffold
-Sends Right Click packet to the server.
+Sends use packet to the server. (Useful for using spawn eggs in air or scaffold.)
 
 ![](https://cdn.discordapp.com/attachments/937393739490537493/1116073604921172071/image.png)
 
@@ -110,5 +120,20 @@ Teleports to target to increase range on KillAura.
 ![](https://cdn.discordapp.com/attachments/937393739490537493/1134086751619645470/image.png)
 <hr />
 
+## TpMine
+Teleports you to the block silently and breaks it.
+
+![](https://cdn.discordapp.com/attachments/937393739490537493/1145961789104857228/tpmine.gif)
+![](https://cdn.discordapp.com/attachments/937393739490537493/1145964040657584138/image.png)
+<hr />
+
 ## DisableTooltips
 Replaces all tooltips with custom name.
+
+<hr />
+
+## Uwuifier
+Uwuifies your messages. Makes your chat UwU.
+Taken from [AttmayMBBot UwUifyer](https://github.com/Woodmaninator/AttmayMBBot/blob/main/src/main/java/attmayMBBot/functionalities/UwUifyer.java)
+
+![](https://cdn.discordapp.com/attachments/937393739490537493/1145952158722838611/image.png)

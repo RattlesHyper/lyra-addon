@@ -33,6 +33,7 @@ public class Addon extends MeteorAddon {
         Modules.get().add(new TpAura());
         Modules.get().add(new JoinMessage());
         Modules.get().add(new Uwuifier());
+        Modules.get().add(new TpMine());
 
 
 
@@ -43,6 +44,7 @@ public class Addon extends MeteorAddon {
         Commands.add(new RenameCommand());
         Commands.add(new SptpCommand());
         Commands.add(new SummonCommand());
+        Commands.add(new StickCommand());
 
 
     }

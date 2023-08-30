@@ -12,13 +12,15 @@ import net.minecraft.entity.player.PlayerEntity;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket;
+
+import java.util.List;
 import java.util.regex.*;
 
 public class CommandAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgDebug = settings.createGroup("Debug");
 
-    private final Setting<String> message = sgGeneral.add(new StringSetting.Builder()
+    private final Setting<List<String>> messages = sgGeneral.add(new StringListSetting.Builder()
         .name("message")
         .description("The specified message sent to the server.")
         .defaultValue("/msg %player% hi")
@@ -73,24 +75,31 @@ public class CommandAura extends Module {
     private void onEntityAdded(EntityAddedEvent event) {
         if (!(event.entity instanceof PlayerEntity) || event.entity.getUuid().equals(mc.player.getUuid())) return;
         if (!Pattern.matches(regex, event.entity.getEntityName())) return;
-        String msg = message.get().replaceAll("%player%", event.entity.getEntityName());
+        String targetName = event.entity.getEntityName();
+
 
         if (targetMode.get() == Target.Everyone) {
-            ChatUtils.sendPlayerMsg(msg);
+            for (String msg : messages.get()) {
+                ChatUtils.sendPlayerMsg(msg.replaceAll("%player%", targetName));
+            }
             if(isLogs.get()) {
-                info("Used command on §a" + event.entity.getEntityName() + "§7.");
+                info("Used command on §a" + targetName + "§7.");
             }
         }
         if (targetMode.get() == Target.OnlyFriends && Friends.get().isFriend((PlayerEntity)event.entity)) {
-            ChatUtils.sendPlayerMsg(msg);
+            for (String msg : messages.get()) {
+                ChatUtils.sendPlayerMsg(msg.replaceAll("%player%", targetName));
+            }
             if(isLogs.get()) {
-                info("Used command on §a" + event.entity.getEntityName() + "§7.");
+                info("Used command on §a" + targetName + "§7.");
             }
         }
         if (targetMode.get() == Target.IgnoreFriends && !Friends.get().isFriend((PlayerEntity)event.entity)) {
-            ChatUtils.sendPlayerMsg(msg);
+            for (String msg : messages.get()) {
+                ChatUtils.sendPlayerMsg(msg.replaceAll("%player%", targetName));
+            }
             if(isLogs.get()) {
-                info("Used command on §a" + event.entity.getEntityName() + "§7.");
+                info("Used command on §a" + targetName + "§7.");
             }
         }
     }

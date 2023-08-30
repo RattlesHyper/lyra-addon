@@ -1,7 +1,6 @@
 package com.lyra.addon.modules;
 
 import com.lyra.addon.Addon;
-import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
@@ -10,23 +9,16 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
-import meteordevelopment.meteorclient.utils.entity.Target;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
-import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.Tameable;
-import net.minecraft.entity.mob.EndermanEntity;
-import net.minecraft.entity.mob.ZombifiedPiglinEntity;
 import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
@@ -76,7 +68,7 @@ public class TpAura extends Module {
         .name("step-size")
         .description("Blocks to travel every step to the target.")
         .defaultValue(6)
-        .min(0)
+        .min(1)
         .sliderMax(10)
         .build()
     );
@@ -156,14 +148,6 @@ public class TpAura extends Module {
         .visible(() -> randomDelayEnabled.get() && !smartDelay.get())
         .build()
     );
-
-    private final Setting<Integer> switchDelay = sgDelay.add(new IntSetting.Builder()
-        .name("switch-delay")
-        .description("How many ticks to wait before hitting an entity after switching hotbar slots.")
-        .defaultValue(0)
-        .min(0)
-        .build()
-    );
     private final Setting<Boolean> isRender = sgRender.add(new BoolSetting.Builder()
         .name("render")
         .description("Renders the radius.")
@@ -179,7 +163,6 @@ public class TpAura extends Module {
 
     private final List<Entity> targets = new ArrayList<>();
     private int hitDelayTimer, switchTimer;
-    private boolean wasPathing;
 
     public TpAura() {
         super(Addon.CATEGORY, "tp-aura", "Teleports to target to increase range on KillAura");
@@ -200,17 +183,6 @@ public class TpAura extends Module {
 
         if (delayCheck()) targets.forEach(this::attack);
 
-    }
-
-    @EventHandler
-    private void onSendPacket(PacketEvent.Send event) {
-        if (event.packet instanceof UpdateSelectedSlotC2SPacket) {
-            switchTimer = switchDelay.get();
-        }
-    }
-
-    private double randomOffset() {
-        return Math.random() * 4 - 2;
     }
 
     private boolean entityCheck(Entity entity) {
@@ -287,10 +259,6 @@ public class TpAura extends Module {
 
     private void tpPacket(double x, double y, double z) {
         mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(x, y, z, true));
-    }
-
-    private void rotate(Entity target, Runnable callback) {
-        Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, Target.Body), callback);
     }
 
     public Entity getTarget() {

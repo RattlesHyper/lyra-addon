@@ -7,10 +7,7 @@ import meteordevelopment.meteorclient.events.game.SendMessageEvent;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 
-import java.awt.*;
-import java.util.Random;
-
-public class Uwuifier extends Module {
+    public class Uwuifier extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 

@@ -21,7 +21,6 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class SummonCommand extends Command {
     private final static SimpleCommandExceptionType NOT_IN_CREATIVE = new SimpleCommandExceptionType(Text.literal("You must be in creative mode to use this."));
-    private final static SimpleCommandExceptionType NO_SPACE = new SimpleCommandExceptionType(Text.literal("No space in hotbar."));
     public SummonCommand() {
         super("summon", "Gives you a stack of the item you're holding.");
     }

@@ -21,7 +21,7 @@ public class ForEach extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgDebug = settings.createGroup("Debug");
-    private final Setting<String> message = sgGeneral.add(new StringSetting.Builder()
+    private final Setting<List<String>> messages = sgGeneral.add(new StringListSetting.Builder()
         .name("message")
         .description("The specified message sent to the server.")
         .defaultValue("/msg %player% hi")
@@ -107,13 +107,14 @@ public class ForEach extends Module {
             try {
                 if (mc.player.getEntityName().equals(playerName) && ignoreSelf.get()) continue;
                 if (!ignoreFriends.get() || ignoreFriends.get() && Friends.get().get(playerName) == null) {
-                    String msg = message.get().replaceAll("%player%", playerName);
                     boolean isMatch = Pattern.matches(regex, playerName);
                     if (isMatch) {
+                        for (String msg : messages.get()) {
+                            ChatUtils.sendPlayerMsg(msg.replaceAll("%player%", playerName));
+                        }
                         if (isLogs.get()) {
                             info("Used command on §a" + playerName + "§7.");
                         }
-                        ChatUtils.sendPlayerMsg(msg);
                     }
                 }
                 Thread.sleep(delayTime.get());
