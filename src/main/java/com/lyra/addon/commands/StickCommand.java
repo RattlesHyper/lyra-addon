@@ -18,6 +18,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
+import com.lyra.addon.utils.Timer;
 
 import java.util.Objects;
 import java.util.Timer;
@@ -43,13 +44,12 @@ public class StickCommand extends Command {
             target = PlayerArgumentType.get(context);
             if (Objects.equals(target.getEntityName(), mc.player.getEntityName())) throw CANT_STICK_TO_SELF.create();
             keepStuck = true;
-            new Timer().scheduleAtFixedRate(new TimerTask(){
-                @Override
-                public void run(){
-                    if (!keepStuck) return;
-                    mc.player.setPosition(target.getX(), target.getY() + 2, target.getZ());
+            new Thread(() -> {
+                for (int i = 1; i > 0; i++) {
+                    if (mc.player != null && target != null && mc.player.distanceTo(target) < 6 && keepStuck)
+                        mc.player.setPosition(target.getX(), target.getY() + 2, target.getZ());
                 }
-            },0,10);
+			}).start();
             mc.player.sendMessage(Text.literal("Sneak to un-stick."), true);
             MeteorClient.EVENT_BUS.subscribe(shiftListener);
             return SINGLE_SUCCESS;
