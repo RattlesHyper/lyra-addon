@@ -5,8 +5,6 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
 import net.minecraft.command.CommandSource;
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -16,12 +14,11 @@ import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
 
 import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 public class StickCommand extends Command {
@@ -43,13 +40,20 @@ public class StickCommand extends Command {
             target = PlayerArgumentType.get(context);
             if (Objects.equals(target.getEntityName(), mc.player.getEntityName())) throw CANT_STICK_TO_SELF.create();
             keepStuck = true;
-            new Timer().scheduleAtFixedRate(new TimerTask(){
-                @Override
-                public void run(){
-                    if (!keepStuck) return;
+            new Thread(() -> {
+                ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+                Runnable task = () -> {
+                    if(!keepStuck) {
+                        executor.shutdown();
+                    };
                     mc.player.setPosition(target.getX(), target.getY() + 2, target.getZ());
-                }
-            },0,10);
+                };
+
+                int initialDelay = 0;
+                int interval = 10;
+
+                executor.scheduleAtFixedRate(task, initialDelay, interval, TimeUnit.MILLISECONDS);
+            }).start();
             mc.player.sendMessage(Text.literal("Sneak to un-stick."), true);
             MeteorClient.EVENT_BUS.subscribe(shiftListener);
             return SINGLE_SUCCESS;

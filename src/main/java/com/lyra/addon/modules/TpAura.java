@@ -64,14 +64,6 @@ public class TpAura extends Module {
         .sliderMax(20)
         .build()
     );
-    private final Setting<Double> stepSize = sgTargeting.add(new DoubleSetting.Builder()
-        .name("step-size")
-        .description("Blocks to travel every step to the target.")
-        .defaultValue(6)
-        .min(1)
-        .sliderMax(10)
-        .build()
-    );
 
     private final Setting<Double> wallsRange = sgTargeting.add(new DoubleSetting.Builder()
         .name("walls-range")
@@ -224,29 +216,23 @@ public class TpAura extends Module {
     }
 
     private void hitEntity(Entity target) {
-        findPath(mc.player.getX(), mc.player.getY(), mc.player.getZ(), target.getX(), target.getY(), target.getZ());
+        double tx = target.getX(), ty = target.getY(), tz = target.getZ();
+        warpPlayer(mc.player.getX(), mc.player.getY(), mc.player.getZ(), tx, ty, tz);
         mc.interactionManager.attackEntity(mc.player, target);
         mc.player.swingHand(Hand.MAIN_HAND);
-        findPath(target.getX(), target.getY(), target.getZ(), mc.player.getX(), mc.player.getY(), mc.player.getZ());
+        warpPlayer(tx, ty, tz, mc.player.getX(), mc.player.getY(), mc.player.getZ());
     }
 
-    private void findPath(double x1, double y1, double z1, double x2, double y2, double z2) {
+    private void warpPlayer(double x1, double y1, double z1, double x2, double y2, double z2) {
 
         double distance = calculateDistance(x1, y1, z1, x2, y2, z2);
+        int packetsRequired = (int) Math.ceil(Math.abs(distance / 10));
 
-        int totalSteps = (int) Math.ceil(distance / stepSize.get());
-
-        double dx = (x2 - x1) / totalSteps;
-        double dy = (y2 - y1) / totalSteps;
-        double dz = (z2 - z1) / totalSteps;
-
-        for (int i = 0; i < totalSteps; i++) {
-            double currentX = x1 + i * dx;
-            double currentY = y1 + i * dy;
-            double currentZ = z1 + i * dz;
-
-            tpPacket(currentX, currentY, currentZ);
+        for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
         }
+
+        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(x2, y2, z2, true));
     }
 
     public static double calculateDistance(double x1, double y1, double z1, double x2, double y2, double z2) {
