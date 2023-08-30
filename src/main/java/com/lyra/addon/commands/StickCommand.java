@@ -46,7 +46,7 @@ public class StickCommand extends Command {
             keepStuck = true;
             new Thread(() -> {
                 for (int i = 1; i > 0; i++) {
-                    if (mc.player != null && target != null && keepStuck)
+                    if (mc.player != null && target != null && mc.player.distanceTo(target) < 6 && keepStuck)
                         mc.player.setPosition(target.getX(), target.getY() + 2, target.getZ());
                 }
 			}).start();
