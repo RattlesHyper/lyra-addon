@@ -44,10 +44,12 @@ public class StickCommand extends Command {
             target = PlayerArgumentType.get(context);
             if (Objects.equals(target.getEntityName(), mc.player.getEntityName())) throw CANT_STICK_TO_SELF.create();
             keepStuck = true;
-            for (int i = 1; i > 0; i++) {
-                if (keepStuck)
-                    mc.player.setPosition(target.getX(), target.getY() + 2, target.getZ());
-            }
+            new Thread(() -> {
+                for (int i = 1; i > 0; i++) {
+                    if (keepStuck)
+                        mc.player.setPosition(target.getX(), target.getY() + 2, target.getZ());
+                }
+			}).start();
             mc.player.sendMessage(Text.literal("Sneak to un-stick."), true);
             MeteorClient.EVENT_BUS.subscribe(shiftListener);
             return SINGLE_SUCCESS;
