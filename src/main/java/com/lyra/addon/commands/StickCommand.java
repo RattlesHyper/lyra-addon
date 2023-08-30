@@ -47,9 +47,9 @@ public class StickCommand extends Command {
                 @Override
                 public void run(){
                     if (!keepStuck) return;
-                    mc.player.updatePosition(target.getX(), target.getY() + 2, target.getZ());
+                    mc.player.setPosition(target.getX(), target.getY() + 2, target.getZ());
                 }
-            },0,1);
+            },0,10);
             mc.player.sendMessage(Text.literal("Sneak to un-stick."), true);
             MeteorClient.EVENT_BUS.subscribe(shiftListener);
             return SINGLE_SUCCESS;

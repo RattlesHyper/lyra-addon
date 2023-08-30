@@ -24,18 +24,9 @@ public class TpMine extends Module {
         .min(0)
         .build()
     );
-    private final Setting<Double> stepSize = sgGeneral.add(new DoubleSetting.Builder()
-        .name("step-size")
-        .description("Blocks to travel every step to the target.")
-        .defaultValue(4)
-        .min(1)
-        .sliderMax(10)
-        .build()
-    );
 
     private HitResult hitResult;
     private BlockPos pos;
-    private int hitDelayTimer;
     public TpMine() {
         super(Addon.CATEGORY, "tp-mine", "Teleports you to the block silently and breaks it.");
     }
@@ -53,32 +44,28 @@ public class TpMine extends Module {
                 VoxelShape shape = state.getCollisionShape(mc.world, pos);
                 if (shape.isEmpty()) shape = state.getOutlineShape(mc.world, pos);
                 double height = shape.isEmpty() ? 1 : shape.getMax(Direction.Axis.Y);
-                if (calculateDistance(((BlockHitResult) hitResult).getBlockPos().getX(),((BlockHitResult) hitResult).getBlockPos().getY(), ((BlockHitResult) hitResult).getBlockPos().getZ(), mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ()) < mc.interactionManager.getReachDistance()) return;
-                findPath(mc.player.getX(), mc.player.getY(), mc.player.getZ(), pos.getX() + 0.5 + side.getOffsetX(), pos.getY() + height, pos.getZ() + 0.5 + side.getOffsetZ());
+                double tx = pos.getX() + 0.5 + side.getOffsetX(), ty = pos.getY() + height, tz = pos.getZ() + 0.5 + side.getOffsetZ();
+                double distance = calculateDistance(mc.player.getX(), mc.player.getY(), mc.player.getZ(), tx, ty, tz);
+                if (distance < mc.interactionManager.getReachDistance()) return;
+
+                warpPlayer(mc.player.getX(), mc.player.getY(), mc.player.getZ(), tx, ty, tz);
                 BlockUtils.breakBlock(((BlockHitResult) hitResult).getBlockPos(), true);
-                findPath(pos.getX() + 0.5 + side.getOffsetX(), pos.getY() + height, pos.getZ() + 0.5 + side.getOffsetZ(), mc.player.getX(), mc.player.getY(), mc.player.getZ());
+                warpPlayer(tx, ty, tz, mc.player.getX(), mc.player.getY(), mc.player.getZ());
             }
 
         }
     }
 
-    private void findPath(double x1, double y1, double z1, double x2, double y2, double z2) {
+    private void warpPlayer(double x1, double y1, double z1, double x2, double y2, double z2) {
 
         double distance = calculateDistance(x1, y1, z1, x2, y2, z2);
+        int packetsRequired = (int) Math.ceil(Math.abs(distance / 10));
 
-        int totalSteps = (int) Math.ceil(distance / stepSize.get());
-
-        double dx = (x2 - x1) / totalSteps;
-        double dy = (y2 - y1) / totalSteps;
-        double dz = (z2 - z1) / totalSteps;
-
-        for (int i = 0; i < totalSteps; i++) {
-            double currentX = x1 + i * dx;
-            double currentY = y1 + i * dy;
-            double currentZ = z1 + i * dz;
-
-            tpPacket(currentX, currentY, currentZ);
+        for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
         }
+
+        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(x2, y2, z2, true));
     }
 
     public static double calculateDistance(double x1, double y1, double z1, double x2, double y2, double z2) {
@@ -87,9 +74,5 @@ public class TpMine extends Module {
         double dz = z2 - z1;
 
         return Math.sqrt(dx * dx + dy * dy + dz * dz);
-    }
-
-    private void tpPacket(double x, double y, double z) {
-        mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(x, y, z, true));
     }
 }
