@@ -42,6 +42,7 @@
 - `.rename` Renames the held item in creative mode.
 - `.sptp` Teleports you with Spectator Mode Teleport packet.
 - `.stack` Gives you a stack of the item you're holding.
+- `.stick` Sticks to the target players head.
 
 <hr />
 

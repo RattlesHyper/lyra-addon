@@ -243,10 +243,6 @@ public class TpAura extends Module {
         return Math.sqrt(dx * dx + dy * dy + dz * dz);
     }
 
-    private void tpPacket(double x, double y, double z) {
-        mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(x, y, z, true));
-    }
-
     public Entity getTarget() {
         if (!targets.isEmpty()) return targets.get(0);
         return null;
