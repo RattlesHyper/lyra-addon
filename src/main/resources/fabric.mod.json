@@ -9,7 +9,7 @@
     "gasps"
   ],
   "contact": {
-    "repo": "https://github.com/MeteorDevelopment/meteor-addon-template"
+    "repo": "https://github.com/RattlesHyper/lyra-addon"
   },
   "icon": "assets/lyra/icon.png",
   "environment": "client",

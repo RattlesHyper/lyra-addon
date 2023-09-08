@@ -172,7 +172,6 @@ public class TpAura extends Module {
         if (!mc.player.isAlive() || PlayerUtils.getGameMode() == GameMode.SPECTATOR) return;
         TargetUtils.getList(targets, this::entityCheck, priority.get(), maxTargets.get());
         if (onlyOnClick.get() && !mc.options.attackKey.isPressed()) return;
-
         if (delayCheck()) targets.forEach(this::attack);
 
     }

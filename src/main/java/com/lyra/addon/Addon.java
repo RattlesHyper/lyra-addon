@@ -19,34 +19,32 @@ public class Addon extends MeteorAddon {
         LOG.info("Initializing Lyra Addon for Meteor Client");
 
         // Modules
-        Modules.get().add(new ItemDropper());
-        Modules.get().add(new RainbowArmor());
-        Modules.get().add(new CommandAura());
-        Modules.get().add(new ChatColor());
-        Modules.get().add(new PacketScaffold());
-        Modules.get().add(new AutoMap());
-        Modules.get().add(new ForEach());
-        Modules.get().add(new SpectatorTeleport());
-        Modules.get().add(new DisableTooltips());
         Modules.get().add(new AutoClip());
-        Modules.get().add(new NoClearChat());
-        Modules.get().add(new TpAura());
+        Modules.get().add(new AutoMap());
+        Modules.get().add(new ChatColor());
+        Modules.get().add(new CommandAura());
+        Modules.get().add(new DisableTooltips());
+        Modules.get().add(new ForEach());
+        Modules.get().add(new ItemDropper());
         Modules.get().add(new JoinMessage());
-        Modules.get().add(new Uwuifier());
+        Modules.get().add(new OnSightCommand());
+        Modules.get().add(new NoClearChat());
+        Modules.get().add(new PacketScaffold());
+        Modules.get().add(new RainbowArmor());
+        Modules.get().add(new SpectatorTeleport());
+        Modules.get().add(new TpAura());
         Modules.get().add(new TpMine());
+        Modules.get().add(new Uwuifier());
 
 
 
         // Commands
-        Commands.add(new StackCommand());
-        Commands.add(new StackCommand());
         Commands.add(new ItemStealer());
         Commands.add(new RenameCommand());
         Commands.add(new SptpCommand());
-        Commands.add(new SummonCommand());
+        Commands.add(new StackCommand());
         Commands.add(new StickCommand());
-
-
+        Commands.add(new SummonCommand());
     }
 
     @Override
