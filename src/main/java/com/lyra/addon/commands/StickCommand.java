@@ -40,6 +40,7 @@ public class StickCommand extends Command {
             target = PlayerArgumentType.get(context);
             if (Objects.equals(target.getEntityName(), mc.player.getEntityName())) throw CANT_STICK_TO_SELF.create();
             keepStuck = true;
+            mc.player.getAbilities().flying = true;
             new Thread(() -> {
                 ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
                 Runnable task = () -> {
@@ -65,6 +66,7 @@ public class StickCommand extends Command {
             if (mc.options.sneakKey.matchesKey(event.key, 0) || mc.options.sneakKey.matchesMouse(event.key)) {
                 if (Modules.get().isActive(Freecam.class)) return;
                 keepStuck = false;
+                mc.player.getAbilities().flying = false;
                 event.cancel();
                 MeteorClient.EVENT_BUS.unsubscribe(this);
             }

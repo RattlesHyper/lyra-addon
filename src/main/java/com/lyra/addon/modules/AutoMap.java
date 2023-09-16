@@ -122,10 +122,10 @@ public class AutoMap extends Module {
                 }
                 if(isDetectBlock.get()) {
                     if(BlockUtils.getPlaceSide(mc.player.getBlockPos().down()) != null) {
-                        mc.player.updatePosition(nextPoint[0] + 0.5, mc.player.getY(), nextPoint[1] + 0.5);
+                        mc.player.setPosition(nextPoint[0] + 0.5, mc.player.getY(), nextPoint[1] + 0.5);
                     }
                 } else {
-                    mc.player.updatePosition(nextPoint[0] + 0.5, mc.player.getY(), nextPoint[1] + 0.5);
+                    mc.player.setPosition(nextPoint[0] + 0.5, mc.player.getY(), nextPoint[1] + 0.5);
                 }
                 if(isLookAt.get()) {
                     mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(mc.player.getX() , mc.player.getBlockY() , mc.player.getZ()));
