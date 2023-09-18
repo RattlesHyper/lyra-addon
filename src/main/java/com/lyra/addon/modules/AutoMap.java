@@ -33,6 +33,7 @@ public class AutoMap extends Module {
     private final Setting<Integer> whatDelay = sgGeneral.add(new IntSetting.Builder()
         .name("delay")
         .defaultValue(1)
+        .min(1)
         .sliderRange(1, 20)
         .build()
     );
