@@ -3,61 +3,82 @@ package com.lyra.addon.utils;
 import java.util.Random;
 
 public class Uwuify {
+	private static final String[] facesArray = new String[] {
+        " (・`ω´・) ",
+        " ;;w;; ",
+        " OwO ",
+        " UwU ",
+        " >w< ",
+        " ^w^ ",
+        " ÚwÚ ",
+        " ^-^ ",
+        " :3 ",
+        " x3 ",
+    };
+    private static final String[] expressionArray = new String[] {
+        " nyaa~~ ",
+        " mya ",
+        " rawr ",
+        " rawr x3 ",
+        " rawr XD",
+        " XD ",
+        " meow ",
+        " meow~ ",
+    };
+    private static final String[] actionArray = new  String[] {
+        " *blushes* ",
+        " *whispers to self* ",
+        " *cries* ",
+        " *screams* ",
+        " *sweats* ",
+        " *twerks* ",
+        " *runs away* ",
+        " *screeches* ",
+        " *walks away* ",
+        " *sees bulge* ",
+        " *looks at you* ",
+        " *notices buldge* ",
+        " *starts twerking* ",
+        " *huggles tightly* ",
+        " *boops your nose* ",
+    };
 
-	// Credits to https://github.com/Woodmaninator/AttmayMBBot/blob/main/src/main/java/attmayMBBot/functionalities/UwUifyer.java
-    // Its improved a bit to be more kawaii uwu >_<
-
-	private static final String[] emojiArray = new String[] { " rawr x3", " rawr xD", " OwO", " UwU", " uwu", " o.O",
-			" >w<", " (⑅˘꒳˘)", " (˘ω˘)",
-			" (U ᵕ U❁)", " σωσ", " òωó", " (U ﹏ U)", " ( o ω o )",
-			" ʘwʘ", " :3", " xD", " >_<", " (✿oωo)", " (^•ω•^)", " ^•ﻌ•^ ",
-			" (ˆ ﻌ ˆ)♡ ", " rawrrr", };
-
-	public static String uwuify(String message, boolean addEmoji) {
-		int currentIndex = 0;
-		StringBuilder stringBuilder = new StringBuilder();
+	public static String uwuify(String message, boolean faces, boolean expressions, boolean actions) {
+        String[] words = message.split("\\s+");
+		StringBuilder uwuText = new StringBuilder();
 		Random random = new Random();
-		while (currentIndex < message.length()) {
-			char currentChar = message.charAt(currentIndex);
-			switch (currentChar) {
-			case ' ':
-				stringBuilder.append(' ');
-				if (random.nextFloat() <= .05f)
-					if (currentIndex + 1 < message.length())
-						if (thisCharIsPartOfTheAlphabet(message.charAt(currentIndex + 1))) {
-							stringBuilder.append(changeCharIfNecessary(message.charAt(currentIndex + 1)));
-							stringBuilder.append('-');
-							stringBuilder.append(changeCharIfNecessary(message.charAt(currentIndex + 1)));
-							if (random.nextFloat() >= .5f) {
-								stringBuilder.append('-');
-								stringBuilder.append(changeCharIfNecessary(message.charAt(currentIndex + 1)));
-							}
-							currentIndex++;
-						}
-				currentIndex++;
-				break;
-			default:
-				stringBuilder.append(changeCharIfNecessary(currentChar));
-				currentIndex++;
-				break;
-			}
-		}
 
-		if (addEmoji)
-			stringBuilder.append(emojiArray[random.nextInt(emojiArray.length)]);
+        double probability = 0.30 / 4;
 
-		return stringBuilder.toString().toLowerCase();
+        for (String word : words) {
+            String replaced = word.replaceAll("[rl]", "w").replaceAll("[RL]", "W");
+
+            if (random.nextDouble() <= probability) {
+                uwuText.append(addStutter(replaced)).append(" ");
+            } else if (random.nextDouble() <= probability && faces) {
+                uwuText.append(replaced).append(facesArray[random.nextInt(facesArray.length)]);
+            } else if (random.nextDouble() <= probability && expressions) {
+                uwuText.append(replaced).append(expressionArray[random.nextInt(expressionArray.length)]);
+            } else if (random.nextDouble() <= probability && actions) {
+                uwuText.append(replaced).append(actionArray[random.nextInt(actionArray.length)]);
+            } else {
+                uwuText.append(replaced).append(" ");
+            }
+        }
+
+        return uwuText.toString().replaceAll(" {2}", " ");
 	}
 
-	private static char changeCharIfNecessary(char c) {
-		if (c == 'l' || c == 'r')
-			return 'w';
-		if (c == 'L' || c == 'R')
-			return 'W';
-		return c;
-	}
+    private static String addStutter(String word) {
+        Random random = new Random();
+        StringBuilder output = new StringBuilder();
 
-	private static boolean thisCharIsPartOfTheAlphabet(char c) {
-		return ((int) c >= 65 && (int) c <= 90) || ((int) c >= 97 && (int) c <= 122);
-	}
+        int stutterLength = random.nextInt(2) + 1;
+        for (int i = 0; i < stutterLength; i++) {
+            output.append(word.charAt(0)).append("-");
+        }
+        output.append(word);
+
+        return output.toString();
+    }
 }

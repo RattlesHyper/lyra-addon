@@ -98,7 +98,7 @@ public class ChatColor extends Module {
             if(c == ' ') {
                 gradientText.append(c);
             } else if (c == ':' && isEmojiAllow.get()) {
-                gradientText.append("&").append(getHex(fallbackColor.get().r, fallbackColor.get().g, fallbackColor.get().b)).append(c);
+                gradientText.append(c);
                 isInsideEmoji = !isInsideEmoji;
             } else if (isInsideEmoji && isEmojiAllow.get()) {
                 gradientText.append(c);
@@ -165,7 +165,6 @@ public class ChatColor extends Module {
         if (message.length() > 256) {
             message = event.message;
         }
-
         event.message = message;
     }
     public enum Mode {

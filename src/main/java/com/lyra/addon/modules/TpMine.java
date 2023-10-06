@@ -1,9 +1,13 @@
 package com.lyra.addon.modules;
 
 import com.lyra.addon.Addon;
+import meteordevelopment.meteorclient.events.render.Render3DEvent;
+import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.utils.render.RenderUtils;
+import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
@@ -16,12 +20,26 @@ import net.minecraft.util.shape.VoxelShape;
 
 public class TpMine extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgRender = settings.createGroup("Render");
 
     private final Setting<Double> maxDistance = sgGeneral.add(new DoubleSetting.Builder()
         .name("max-distance")
         .description("The maximum distance you can teleport.")
         .defaultValue(20)
         .min(0)
+        .build()
+    );
+    private final Setting<Boolean> isRenderBlock = sgRender.add(new BoolSetting.Builder()
+        .name("render")
+        .description("Renders the target block.")
+        .defaultValue(true)
+        .build()
+    );
+    private final Setting<SettingColor> targetColor = sgRender.add(new ColorSetting.Builder()
+        .name("render-color")
+        .description("Set target block render color.")
+        .defaultValue(new SettingColor(0, 255, 150, 255))
+        .visible(isRenderBlock::get)
         .build()
     );
 
@@ -74,5 +92,11 @@ public class TpMine extends Module {
         double dz = z2 - z1;
 
         return Math.sqrt(dx * dx + dy * dy + dz * dz);
+    }
+    @EventHandler
+    private void onRender(Render3DEvent event) {
+        if (!isRenderBlock.get()) return;
+        if (pos == null || hitResult.getType() != HitResult.Type.BLOCK) return;
+        RenderUtils.renderTickingBlock(pos, targetColor.get(), targetColor.get(), ShapeMode.Lines, 0, 0, false, false);
     }
 }

@@ -29,6 +29,7 @@
 - **[ItemDropper](#itemdropper)**
 - **[JoinMessage](#joinmessage)** 
 - **[NoChatClear](#nochatclear)**
+- **[OnSightCommand](#onsightcommand)**
 - **[PacketScaffold](#packetscaffold)**
 - **[RainbowArmor](#rainbowarmor)**
 - **[DisableTooltips](#disabletooltips)**
@@ -99,6 +100,11 @@ Runs command when you spawn in a server. Put (me) to put username automatically.
 
 ## NoChatClear
 It disables the method servers try to clear your chat.
+
+<hr />
+
+## OnSightCommand
+Executes commands on target in sight.
 
 <hr />
 
