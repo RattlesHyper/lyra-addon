@@ -98,6 +98,9 @@ public class ChatColor extends Module {
             if(c == ' ') {
                 gradientText.append(c);
             } else if (c == ':' && isEmojiAllow.get()) {
+                if(!isInsideEmoji) {
+                gradientText.append("&").append(getHex(fallbackColor.get().r, fallbackColor.get().g, fallbackColor.get().b));
+                }
                 gradientText.append(c);
                 isInsideEmoji = !isInsideEmoji;
             } else if (isInsideEmoji && isEmojiAllow.get()) {
@@ -154,12 +157,13 @@ public class ChatColor extends Module {
     private void onMessageSend(SendMessageEvent event) {
         String message = event.message;
 
-        if (styleMode.get() == Mode.Gradient || styleMode.get() == Mode.Rainbow) {
-            message = generateGradientText(event.message);
-        }
-
-        if (styleMode.get() == Mode.Normal || message.length() > 256) {
-            message = textFormatting(event.message, true);
+        switch (styleMode.get()) {
+            case Normal -> {
+                message = textFormatting(event.message, true);
+            }
+            case Rainbow, Gradient ->  {
+                message = generateGradientText(event.message);
+            }
         }
 
         if (message.length() > 256) {

@@ -43,7 +43,7 @@ public class Uwuify {
         " *boops your nose* ",
     };
 
-	public static String uwuify(String message, boolean faces, boolean expressions, boolean actions) {
+	public static String uwuify(String message, boolean stutter, int stutterMax, boolean faces, boolean expressions, boolean actions) {
         String[] words = message.split("\\s+");
 		StringBuilder uwuText = new StringBuilder();
 		Random random = new Random();
@@ -53,8 +53,8 @@ public class Uwuify {
         for (String word : words) {
             String replaced = word.replaceAll("[rl]", "w").replaceAll("[RL]", "W");
 
-            if (random.nextDouble() <= probability) {
-                uwuText.append(addStutter(replaced)).append(" ");
+            if (random.nextDouble() <= probability && stutter) {
+                uwuText.append(addStutter(replaced, stutterMax)).append(" ");
             } else if (random.nextDouble() <= probability && faces) {
                 uwuText.append(replaced).append(facesArray[random.nextInt(facesArray.length)]);
             } else if (random.nextDouble() <= probability && expressions) {
@@ -69,13 +69,13 @@ public class Uwuify {
         return uwuText.toString().replaceAll(" {2}", " ");
 	}
 
-    private static String addStutter(String word) {
+    private static String addStutter(String word, int max) {
         Random random = new Random();
         StringBuilder output = new StringBuilder();
 
-        int stutterLength = random.nextInt(2) + 1;
+        int stutterLength = random.nextInt(max) + 1;
         for (int i = 0; i < stutterLength; i++) {
-            output.append(word.charAt(0)).append("-");
+            output.append(word.startsWith("&#") ? word.charAt(8) : word.charAt(0)).append("-");
         }
         output.append(word);
 

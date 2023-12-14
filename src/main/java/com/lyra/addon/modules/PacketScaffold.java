@@ -8,6 +8,7 @@ import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -76,6 +77,7 @@ public class PacketScaffold extends Module {
     }
     @EventHandler
     private void onTick(TickEvent.Pre event) {
+        if (mc.currentScreen instanceof HandledScreen<?>) return;
         Vec3d customPos = new Vec3d(mc.player.getX(), isYlock.get() ? ylock : mc.player.getY() -1, mc.player.getZ());
         BlockPos blockPos = new BlockPos(mc.player.getBlockX(), isYlock.get() ? (int) ylock : mc.player.getBlockY() - 1, mc.player.getBlockZ());
         Hand customHand = handMode.get();
