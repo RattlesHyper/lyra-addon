@@ -14,6 +14,7 @@
 <hr />
 
 # How to use
+- FIX
 - Download the latest [release](/../../releases) of the mod from the releases tab.
 - Put it in your `.minecraft/mods` folder where you have installed Meteor.
 
