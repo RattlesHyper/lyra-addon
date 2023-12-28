@@ -22,6 +22,7 @@ public class Addon extends MeteorAddon {
         Modules.get().add(new AutoClip());
         Modules.get().add(new AutoMap());
         Modules.get().add(new AutoSex());
+        Modules.get().add(new CustomHead());
         Modules.get().add(new ChatColor());
         Modules.get().add(new CommandAura());
         Modules.get().add(new DisableTooltips());

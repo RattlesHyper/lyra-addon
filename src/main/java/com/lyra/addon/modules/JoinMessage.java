@@ -38,7 +38,7 @@ public class JoinMessage extends Module {
             public void run() {
                 if (mc.player != null) {
                     for (String msg : messages.get()) {
-                        ChatUtils.sendPlayerMsg(msg.replaceAll("(me)", mc.player.getEntityName()));
+                        ChatUtils.sendPlayerMsg(msg.replaceAll("(me)", String.valueOf(mc.player.getName())));
                     }
                 }
             }

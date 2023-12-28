@@ -172,7 +172,7 @@ public class AutoSex extends Module{
         if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
         if (!PlayerUtils.isWithin(entity, 10)) return false;
         if (!PlayerUtils.canSeeEntity(entity) && !PlayerUtils.isWithin(entity, 10)) return false;
-        if (!Pattern.matches(regex, entity.getEntityName())) return false;
+        if (!Pattern.matches(regex, (CharSequence) entity.getName())) return false;
         return entity.isPlayer();
     }
 
@@ -181,7 +181,7 @@ public class AutoSex extends Module{
     private void onMouseButton(MouseButtonEvent event) {
         if(targetMode.get() == Mode.MiddleClick){
             if (event.action == KeyAction.Press && event.button == GLFW_MOUSE_BUTTON_MIDDLE && mc.currentScreen == null && mc.targetedEntity != null && mc.targetedEntity instanceof PlayerEntity) {
-                playerName = mc.targetedEntity.getEntityName();
+                playerName = String.valueOf(mc.targetedEntity.getName());
                 target = mc.targetedEntity;
 
                 if (message.get()) {
@@ -194,7 +194,7 @@ public class AutoSex extends Module{
     private void onTick(TickEvent.Post event) {
         if(randomCum.get() && shouldCum()) {
             ItemStack milk = new ItemStack(Items.MILK_BUCKET);
-            milk.setCustomName(Text.of("§4§l" +mc.player.getEntityName() + "'s §f§lCUM"));
+            milk.setCustomName(Text.of("§4§l" +mc.player.getName() + "'s §f§lCUM"));
             for (int i = 9; i < 11; i++) {
                 mc.player.networkHandler.sendPacket(new CreativeInventoryActionC2SPacket(i, milk));
             }
@@ -296,7 +296,7 @@ public class AutoSex extends Module{
         TargetUtils.getList(targets, this::entityCheck, SortPriority.LowestDistance, 1);
         if(targets.isEmpty()) return;
         target = targets.get(0);
-        playerName = target.getEntityName();
+        playerName = String.valueOf(target.getName());
         startMsg();
     }
     public void startMsg() {

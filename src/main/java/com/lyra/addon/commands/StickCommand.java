@@ -38,7 +38,7 @@ public class StickCommand extends Command {
 
         builder.then(argument("player", PlayerArgumentType.create()).executes(context -> {
             target = PlayerArgumentType.get(context);
-            if (Objects.equals(target.getEntityName(), mc.player.getEntityName())) throw CANT_STICK_TO_SELF.create();
+            if (Objects.equals(target.getName(), mc.player.getName())) throw CANT_STICK_TO_SELF.create();
             keepStuck = true;
             mc.player.getAbilities().flying = true;
             new Thread(() -> {

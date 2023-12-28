@@ -5,6 +5,8 @@ import com.lyra.addon.utils.CreativeSetItem;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import net.minecraft.item.ItemStack;
@@ -101,7 +103,7 @@ public class RainbowArmor extends Module {
         tag.putInt("color", generateRGBMATH());
         nbt.put("display", tag);
 
-        if(enableHead.get()) {
+        if(enableHead.get() && !Modules.get().isActive(CustomHead.class)) {
             ItemStack item = new ItemStack(Items.LEATHER_HELMET);
             item.setNbt(nbt);
             CreativeSetItem.set(item, 5);
@@ -128,7 +130,7 @@ public class RainbowArmor extends Module {
         tag.putInt("color", generateRGBMATH());
         nbt.put("display", tag);
 
-        if(enableHead.get() && linearI == 0) {
+        if(enableHead.get() && linearI == 0 && !Modules.get().isActive(CustomHead.class)) {
             ItemStack item = new ItemStack(Items.LEATHER_HELMET);
             item.setNbt(nbt);
             CreativeSetItem.set(item, 5);
