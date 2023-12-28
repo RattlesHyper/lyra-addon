@@ -28,8 +28,8 @@ public class CustomHead extends Module {
         .build()
     );
     private final Setting<Integer> headDelay = sgGeneral.add(new IntSetting.Builder()
-        .name("head-item-delay")
-        .description("Delay for head item.")
+        .name("delay")
+        .description("Delay.")
         .defaultValue(2)
         .min(1)
         .sliderMax(20)
