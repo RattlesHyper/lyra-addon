@@ -105,7 +105,7 @@ public class ForEach extends Module {
                 return;
             }
             try {
-                if (mc.player.getEntityName().equals(playerName) && ignoreSelf.get()) continue;
+                if (mc.player.getName().getString().equals(playerName) && ignoreSelf.get()) continue;
                 if (!ignoreFriends.get() || ignoreFriends.get() && Friends.get().get(playerName) == null) {
                     boolean isMatch = Pattern.matches(regex, playerName);
                     if (isMatch) {
