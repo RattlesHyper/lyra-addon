@@ -37,7 +37,7 @@ public class AutoClip extends Module {
             Vec3d pos;
             if (mc.player.forwardSpeed == 0) {
                 pos = mc.player.sidewaysSpeed < 0 ?
-                    new Vec3d(playerPos.getX() - direction.z * i, playerPos.getY(), playerPos.getZ() - direction.x * i) : new Vec3d(playerPos.getX() + direction.z * i, playerPos.getY(), playerPos.getZ() + direction.x * i);
+                    new Vec3d(playerPos.getX() - direction.z * i, playerPos.getY(), playerPos.getZ() + direction.x * i) : new Vec3d(playerPos.getX() + direction.z * i, playerPos.getY(), playerPos.getZ() - direction.x * i);
             } else {
                 pos = mc.player.forwardSpeed < 0 ?
                     new Vec3d(playerPos.getX() - direction.x * i, playerPos.getY(), playerPos.getZ() - direction.z * i) : new Vec3d(playerPos.getX() + direction.x * i, playerPos.getY(), playerPos.getZ() + direction.z * i);
