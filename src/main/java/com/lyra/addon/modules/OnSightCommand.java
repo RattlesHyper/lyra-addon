@@ -111,7 +111,7 @@ public class OnSightCommand extends Module {
         if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
         if (!PlayerUtils.isWithin(entity, range.get())) return false;
         if (!PlayerUtils.canSeeEntity(entity) && !PlayerUtils.isWithin(entity, wallsRange.get())) return false;
-        if (!Pattern.matches(regex, entity.getEntityName())) return false;
+        if (!Pattern.matches(regex, entity.getName().getString())) return false;
         return entity.isPlayer();
     }
 
@@ -119,7 +119,7 @@ public class OnSightCommand extends Module {
         double tx = target.getX(), ty = target.getY(), tz = target.getZ();
         if (isTeleport.get()) warpPlayer(mc.player.getX(), mc.player.getY(), mc.player.getZ(), tx, ty, tz);
         for (String msg : messages.get()) {
-            ChatUtils.sendPlayerMsg(msg.replaceAll("%player%", target.getEntityName()));
+            ChatUtils.sendPlayerMsg(msg.replaceAll("%player%", target.getName().getString()));
         }
         if (isTeleport.get()) warpPlayer(mc.player.getX(), mc.player.getY(), mc.player.getZ(), tx, ty, tz);
     }
