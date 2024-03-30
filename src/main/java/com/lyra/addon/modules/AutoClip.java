@@ -33,9 +33,15 @@ public class AutoClip extends Module {
         Vec3d playerPos = new Vec3d(mc.player.getX(), mc.player.getY(), mc.player.getZ());
 
         for (int i = 2; i < horizontalRange.get(); i++) {
-            Vec3d forward = Vec3d.fromPolar(0, mc.player.getYaw()).normalize();
-            Vec3d pos = new Vec3d(playerPos.getX() + forward.x * i, playerPos.getY(), playerPos.getZ() + forward.z * i);
-
+            Vec3d direction = Vec3d.fromPolar(0, mc.player.getYaw()).normalize();
+            Vec3d pos;
+            if (mc.player.forwardSpeed == 0) {
+                pos = mc.player.sidewaysSpeed < 0 ?
+                    new Vec3d(playerPos.getX() - direction.z * i, playerPos.getY(), playerPos.getZ() - direction.x * i) : new Vec3d(playerPos.getX() + direction.z * i, playerPos.getY(), playerPos.getZ() + direction.x * i);
+            } else {
+                pos = mc.player.forwardSpeed < 0 ?
+                    new Vec3d(playerPos.getX() - direction.x * i, playerPos.getY(), playerPos.getZ() - direction.z * i) : new Vec3d(playerPos.getX() + direction.x * i, playerPos.getY(), playerPos.getZ() + direction.z * i);
+            }
             Block f1 = checkBlock(pos.getX(), pos.getY(), pos.getZ());
             Block fu = checkBlock(pos.getX(), pos.getY() + 1, pos.getZ());
 
