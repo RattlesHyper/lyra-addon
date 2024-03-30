@@ -18,7 +18,7 @@
 - Download the latest [release](/../../releases) of the mod from the releases tab.
 - Put it in your `.minecraft/mods` folder where you have installed Meteor.
 
-*Note: It is recommended to use the Release 0.5.4 [1.20-1.20.1] version of meteor while using Lyra-Addon*
+*Note: It is recommended to use [1.20-1.20.4] version of meteor while using Lyra-Addon*
 
 ## Modules
 
