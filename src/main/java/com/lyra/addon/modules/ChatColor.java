@@ -22,6 +22,13 @@ public class ChatColor extends Module {
         .defaultValue(Mode.Normal)
         .build()
     );
+    private final Setting<Format> formatMode = sgGeneral.add(new EnumSetting.Builder<Format>()
+        .name("format")
+        .description("Different formats for chat color.")
+        .defaultValue(Format.RRGGBB)
+        .visible(() -> styleMode.get() == Mode.Gradient)
+        .build()
+    );
     private final Setting<SettingColor> startColor = sgGeneral.add(new ColorSetting.Builder()
         .name("start-color")
         .description("The Gradient start color.")
@@ -81,7 +88,7 @@ public class ChatColor extends Module {
     );
 
     public ChatColor() {
-        super(Addon.CATEGORY, "chat-color", "Better chat colors and style formatting. For servers with ChatColor2 plugin.");
+        super(Addon.CATEGORY, "chat-color", "Better chat colors and style formatting.");
     }
 
     private String generateGradientText(String text) {
@@ -176,4 +183,8 @@ public class ChatColor extends Module {
         Rainbow,
         Gradient,
     }
+    public enum Format {
+        RRGGBB
+    }
+
 }

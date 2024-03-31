@@ -14,6 +14,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.*;
 
 public class CommandAura extends Module {
@@ -73,8 +74,8 @@ public class CommandAura extends Module {
     }
     @EventHandler
     private void onEntityAdded(EntityAddedEvent event) {
-        if (!(event.entity instanceof PlayerEntity) || event.entity.getUuid().equals(mc.player.getUuid())) return;
-        if (!Pattern.matches(regex, event.entity.entity.getName().getString())) return;
+        if (!(event.entity instanceof PlayerEntity) || event.entity.getUuid().equals(Objects.requireNonNull(mc.player).getUuid())) return;
+        if (!Pattern.matches(regex, event.entity.getName().getString())) return;
         String targetName = event.entity.getName().getString();
 
 

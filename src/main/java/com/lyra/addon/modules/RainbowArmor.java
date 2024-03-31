@@ -3,6 +3,7 @@ package com.lyra.addon.modules;
 import com.lyra.addon.Addon;
 import com.lyra.addon.utils.CreativeSetItem;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
+import meteordevelopment.meteorclient.events.world.PlaySoundEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -66,6 +67,12 @@ public class RainbowArmor extends Module {
         .defaultValue(true)
         .build()
     );
+    private final Setting<Boolean> blockSound = sgExtra.add(new BoolSetting.Builder()
+        .name("block-sound")
+        .description("Blocks armor equip sound.")
+        .defaultValue(true)
+        .build()
+    );
 
     public RainbowArmor() {
         super(Addon.CATEGORY, "rainbow-armor", "Gives you Rainbow Leather Armor with various modes.");
@@ -95,7 +102,12 @@ public class RainbowArmor extends Module {
         }
 
     }
-
+    @EventHandler
+    private void onPlaySound(PlaySoundEvent event) {
+        if (event.sound.getId().toString().equals("minecraft:item.armor.equip_leather") && blockSound.get()) {
+            event.cancel();
+        }
+    }
     private void setArmor() {
         NbtCompound nbt = new NbtCompound();
         NbtCompound tag = nbt.getCompound("display");

@@ -3,6 +3,7 @@ package com.lyra.addon.modules;
 import com.lyra.addon.Addon;
 import com.mojang.brigadier.StringReader;
 import meteordevelopment.meteorclient.commands.arguments.CompoundNbtTagArgumentType;
+import meteordevelopment.meteorclient.events.world.PlaySoundEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -54,6 +55,12 @@ public class CustomHead extends Module {
         .defaultValue(true)
         .build()
     );
+    private final Setting<Boolean> blockSound = sgExtra.add(new BoolSetting.Builder()
+        .name("block-sound")
+        .description("Blocks armor equip sound.")
+        .defaultValue(true)
+        .build()
+    );
     public CustomHead() {
         super(Addon.CATEGORY, "custom-head", "Sets custom item in head slot.");
     }
@@ -77,6 +84,13 @@ public class CustomHead extends Module {
         toggle();
     }
     @EventHandler
+    private void onPlaySound(PlaySoundEvent event) {
+        System.out.println(event.sound.getId());
+        if (event.sound.getId().toString().startsWith("minecraft:item.armor.equip") && blockSound.get()) {
+            event.cancel();
+        }
+    }
+    @EventHandler
     private void onTick(TickEvent.Post event) {
         ticks++;
         if (ticks % headDelay.get() == 0) {
@@ -90,9 +104,11 @@ public class CustomHead extends Module {
                 if (nbtI >= customNbt.get().size()) nbtI = 0;
                 String nbt = customNbt.get().get(nbtI);
                 try {
-                        itemStack.setNbt(CompoundNbtTagArgumentType().create().parse(new StringReader(nbt)));
+                    if (!Objects.equals(nbt, "")) {
+                    itemStack.setNbt(CompoundNbtTagArgumentType.create().parse(new StringReader(nbt)));
                     }
-                } catch (CommandSyntaxException e) {
+                }
+                catch (CommandSyntaxException e) {
                     throw new RuntimeException(e);
                 }
                 nbtI++;
