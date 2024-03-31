@@ -90,7 +90,6 @@ public class CustomHead extends Module {
                 if (nbtI >= customNbt.get().size()) nbtI = 0;
                 String nbt = customNbt.get().get(nbtI);
                 try {
-                    if(!Objects.equals(nbt, "")) {
                         itemStack.setNbt(CompoundNbtTagArgumentType().create().parse(new StringReader(nbt)));
                     }
                 } catch (CommandSyntaxException e) {
