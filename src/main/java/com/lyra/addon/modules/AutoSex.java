@@ -1,12 +1,15 @@
 package com.lyra.addon.modules;
 
 import com.lyra.addon.Addon;
+import com.lyra.addon.utils.SetItem;
+import com.mojang.authlib.GameProfile;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
@@ -16,17 +19,19 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Position;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.regex.Pattern;
@@ -50,6 +55,14 @@ public class AutoSex extends Module{
             target = null;
             playerName = null;
         })
+        .build()
+    );
+    private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
+        .name("range")
+        .description("The maximum range to set target.")
+        .defaultValue(6)
+        .min(0)
+        .sliderMax(6)
         .build()
     );
     private final Setting<Boolean> sexPos = sgGeneral.add(new BoolSetting.Builder()
@@ -87,8 +100,8 @@ public class AutoSex extends Module{
         .visible(sexPos::get)
         .build()
     );
-    // Message
 
+    // Message
     private final Setting<Integer> delay = sgMessage.add(new IntSetting.Builder()
         .name("delay")
         .description("The delay between specified messages in ticks.")
@@ -110,35 +123,31 @@ public class AutoSex extends Module{
     private final Setting<List<String>> messages = sgMessage.add(new StringListSetting.Builder()
         .name("messages")
         .description("Messages to use for dirty talk.")
-        .defaultValue(List.of(
-            "God, I love you so much %player%~",
-            "%player% I'm already dripping.",
-            "I need to feel you against me %player%~",
-            "%player% I want your mouth on me~",
-            "Oh god, you're so big %player%!",
-            "Treat me like a whore!",
-            "I want to see you play with yourself %player%~",
-            "I want you to undress me~",
-            "I want to taste you %player%~~",
-            "Come for me %player%~",
-            "Choke me!~",
-            "Just like that %player%~! AUGHH~",
-            "AHHH~ Right there %player%~",
-            "Moan for me %player%~",
-            "You like that %player%~?",
-            "Play with me %player%~",
-            "%player% I love the way you taste~",
-            "I love your body %player%~~",
-            "I love it when you touch me there~",
-            "I love the way you moan %player%~",
-            "I love how hard you can make me cum",
-            "%player% Your tongue is magical.",
-            "%player% You are not allowed to cum until I say so.",
-            "I’m going to drain you %player%~!",
-            "I know I am naughty~",
-            "I want to f*ck you so hard right now %player%~!",
-            "I am crazy for you!",
-            "I wanna feel you. Taste you. Touch you %player%"
+        .defaultValue(Arrays.asList(
+            "I want you to make me your filthy slut~",
+            "Fuck me so hard I can't walk straight~",
+            "I want to taste every drop of you, %player%~",
+            "Fill all my holes~",
+            "Make me choke on you, %player%~",
+            "Make me squirt all over you~",
+            "Fuck me like the dirty slut I am, AUGHH~",
+            "I want you all over my face, %player%~",
+            "I want you to use me until I'm sore~",
+            "Make me cum so hard I can't stop shaking, %player%~",
+            "I want to be your cum slut~",
+            "Fuck me until I'm a dripping mess, %player%~",
+            "Make me scream your name while you fuck me~",
+            "I want you to use me however you want, %player%~",
+            "Fill my mouth and make me swallow, AHhhH~",
+            "Make me cum all over you~",
+            "Fuck me until I beg for mercy, %player%~",
+            "I want to be your personal cum dump~",
+            "Use me like your personal toy, %player%~",
+            "I want you to ruin me, %player%~",
+            "Make me cum all over your fingers, %player%~",
+            "I crave your touch everywhere",
+            "I need you to dominate me, mMMM!~"
+
         ))
         .visible(message::get)
         .build()
@@ -150,16 +159,16 @@ public class AutoSex extends Module{
         .build()
     );
 
-
     public AutoSex() {
         super(Addon.CATEGORY, "auto-sex", "Automatic Minecraft Sex RP.");
     }
     private final List<Entity> targets = new ArrayList<>();
     String regex = "[A-Za-z0-9_]+";
     private int messageI, timer, timerSex, sexI;
+    static double renderY;
+    double addition = 0.0;
     String playerName;
     Entity target = null;
-
 
     @Override
     public void onActivate() {
@@ -167,12 +176,13 @@ public class AutoSex extends Module{
             setTarget();
         }
     }
+
     private boolean entityCheck(Entity entity) {
         if (entity.equals(mc.player) || entity.equals(mc.cameraEntity)) return false;
         if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
-        if (!PlayerUtils.isWithin(entity, 10)) return false;
-        if (!PlayerUtils.canSeeEntity(entity) && !PlayerUtils.isWithin(entity, 10)) return false;
-        if (!Pattern.matches(regex, (CharSequence) entity.getName())) return false;
+        if (!PlayerUtils.isWithin(entity, range.get())) return false;
+        if (!PlayerUtils.canSeeEntity(entity) && !PlayerUtils.isWithin(entity, range.get())) return false;
+        if (Pattern.matches(regex, entity.getName().toString())) return false;
         return entity.isPlayer();
     }
 
@@ -180,28 +190,38 @@ public class AutoSex extends Module{
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
         if(targetMode.get() == Mode.MiddleClick){
-            if (event.action == KeyAction.Press && event.button == GLFW_MOUSE_BUTTON_MIDDLE && mc.currentScreen == null && mc.targetedEntity != null && mc.targetedEntity instanceof PlayerEntity) {
-                playerName = String.valueOf(mc.targetedEntity.getName());
-                target = mc.targetedEntity;
+            if (event.action == KeyAction.Press && event.button == GLFW_MOUSE_BUTTON_MIDDLE && mc.currentScreen == null) {
+                if (mc.targetedEntity instanceof PlayerEntity) {
+                    playerName = mc.targetedEntity.getName().toString();
+                    target = mc.targetedEntity;
 
-                if (message.get()) {
-                    startMsg();
+                    if (message.get()) {
+                        startMsg();
+                    }
+                } else  {
+                    target = null;
+                    playerName = null;
+                    mc.player.getAbilities().flying = false;
                 }
             }
         }
     }
+
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if(randomCum.get() && shouldCum()) {
             ItemStack milk = new ItemStack(Items.MILK_BUCKET);
-            milk.setCustomName(Text.of("§4§l" +mc.player.getName() + "'s §f§lCUM"));
+            milk.set(DataComponentTypes.CUSTOM_NAME, Text.literal("§4§l" + EntityUtils.getName(mc.player) + "'s §f§lCUM"));
             for (int i = 9; i < 11; i++) {
-                mc.player.networkHandler.sendPacket(new CreativeInventoryActionC2SPacket(i, milk));
+                SetItem.set(milk, i);
             }
             for (int i = 9; i < 11; i++) {
                 InvUtils.drop().slot(i);
             }
         }
+
+        checkEntity();
+
         if (target == null) return;
 
         if(sexPos.get()) {
@@ -263,7 +283,6 @@ public class AutoSex extends Module{
             }
         }
     }
-    double addition = 0.0;
     @EventHandler
     private void onRender(Render3DEvent event) {
         if (target == null || !isRender.get()) return;
@@ -271,16 +290,13 @@ public class AutoSex extends Module{
         Vec3d last = null;
         if (addition > 360) addition = 0;
         for (int i = 0; i < 360; i ++) {
-            Random rand = new Random();
-            double randomValue = 0.2 + (0.0 - 0.1) * rand.nextDouble();
             Color c1 = new Color(255, 0, 255, 255);;
-
             Vec3d tp = target.getPos();
 
             double rad = Math.toRadians(i);
             double sin = Math.sin(rad);
             double cos = Math.cos(rad);
-            Vec3d c = new Vec3d(tp.x + sin, tp.y + randomValue, tp.z + cos);
+            Vec3d c = new Vec3d(tp.x + sin, tp.y + getRenderY(), tp.z + cos);
             if (last != null) event.renderer.line(last.x, last.y, last.z, c.x, c.y, c.z, c1);
             last = c;
         }
@@ -292,27 +308,48 @@ public class AutoSex extends Module{
         playerName = null;
         mc.player.getAbilities().flying = false;
     }
-    public void setTarget() {
+    private void checkEntity() {
+        List <String> playerNamesList = mc.player.networkHandler.getPlayerList().stream()
+            .map(PlayerListEntry::getProfile)
+            .map(GameProfile::getName)
+            .toList();
+
+        if (!playerNamesList.contains(target.getName().toString())) target = null;
+
+        if (target == null && targetMode.get() == Mode.Automatic) {
+            setTarget();
+        }
+    }
+    private void setTarget() {
         TargetUtils.getList(targets, this::entityCheck, SortPriority.LowestDistance, 1);
         if(targets.isEmpty()) return;
         target = targets.get(0);
-        playerName = String.valueOf(target.getName());
+        playerName = target.getName().toString();
         startMsg();
     }
-    public void startMsg() {
+    private static double getRenderY() {
+        Random rand = new Random();
+        double randomValue = 0.2 + (0.0 - 0.05) * rand.nextDouble();
+        if (renderY >= 0.3) {
+            renderY = 0;
+        }
+        renderY+= randomValue;
+        return renderY;
+    }
+    private void startMsg() {
         if (message.get()) {
             ChatUtils.sendPlayerMsg("Come here " + playerName + " I want you uwu");
         }
     }
-    public static boolean shouldCum() {
+    private static boolean shouldCum() {
         double chance = Math.random();
         return chance <= 0.1;
     }
-    public enum Mode {
+    private enum Mode {
         MiddleClick,
         Automatic
     }
-    public enum Style {
+    private enum Style {
         GulpGulp,
         Doggy
     }

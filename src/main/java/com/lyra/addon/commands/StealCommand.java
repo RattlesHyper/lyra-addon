@@ -7,12 +7,9 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
-public class ItemStealer extends Command {
-    public ItemStealer() {
+public class StealCommand extends Command {
+    public StealCommand() {
         super("steal", "Steals the targets held item. Creative mode only.");
     }
     @Override
@@ -20,7 +17,6 @@ public class ItemStealer extends Command {
         builder.then(argument("player", PlayerArgumentType.create()).executes(context -> {
             PlayerEntity player = PlayerArgumentType.get(context);
             ItemStack stack = player.getInventory().getMainHandStack();
-            System.out.println(stack);
             giveItem(stack);
             return SINGLE_SUCCESS;
         }));

@@ -1,17 +1,19 @@
 package com.lyra.addon.modules;
 
 import com.lyra.addon.Addon;
-import com.lyra.addon.utils.CreativeSetItem;
+import com.lyra.addon.utils.SetItem;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.world.PlaySoundEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.DyedColorComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
 
 public class RainbowArmor extends Module {
 
@@ -95,12 +97,10 @@ public class RainbowArmor extends Module {
     }
     @EventHandler
     private void onTick(TickEvent.Post event) {
-
         switch (rainbowMODE.get()) {
             case Default -> setArmor();
             case Linear -> methodLinear();
         }
-
     }
     @EventHandler
     private void onPlaySound(PlaySoundEvent event) {
@@ -109,59 +109,56 @@ public class RainbowArmor extends Module {
         }
     }
     private void setArmor() {
-        NbtCompound nbt = new NbtCompound();
-        NbtCompound tag = nbt.getCompound("display");
-        tag.putInt("color", generateRGBMATH());
-        nbt.put("display", tag);
+
+        DyedColorComponent dye = new DyedColorComponent(generateRGBMATH(), true);
 
         if(enableHead.get() && !Modules.get().isActive(CustomHead.class)) {
+            InvUtils.swap(36, true);
             ItemStack item = new ItemStack(Items.LEATHER_HELMET);
-            item.setNbt(nbt);
-            CreativeSetItem.set(item, 5);
+            item.set(DataComponentTypes.DYED_COLOR, dye);
+            SetItem.set(item, 5);
         }
         if(enableChestplate.get()) {
             ItemStack item = new ItemStack(Items.LEATHER_CHESTPLATE);
-            item.setNbt(nbt);
-            CreativeSetItem.set(item, 6);
+            item.set(DataComponentTypes.DYED_COLOR, dye);
+            SetItem.set(item, 6);
         }
         if(enableLeggings.get()) {
             ItemStack item = new ItemStack(Items.LEATHER_LEGGINGS);
-            item.setNbt(nbt);
-            CreativeSetItem.set(item, 7);
+            item.set(DataComponentTypes.DYED_COLOR, dye);
+            SetItem.set(item, 7);
         }
         if(enableBoots.get()) {
             ItemStack item = new ItemStack(Items.LEATHER_BOOTS);
-            item.setNbt(nbt);
-            CreativeSetItem.set(item, 8);
+            item.set(DataComponentTypes.DYED_COLOR, dye);
+            SetItem.set(item, 8);
         }
     }
     private void methodLinear() {
-        NbtCompound nbt = new NbtCompound();
-        NbtCompound tag = nbt.getCompound("display");
-        tag.putInt("color", generateRGBMATH());
-        nbt.put("display", tag);
+
+        DyedColorComponent dye = new DyedColorComponent(generateRGBMATH(), true);
 
         if(enableHead.get() && linearI == 0 && !Modules.get().isActive(CustomHead.class)) {
             ItemStack item = new ItemStack(Items.LEATHER_HELMET);
-            item.setNbt(nbt);
-            CreativeSetItem.set(item, 5);
+            item.set(DataComponentTypes.DYED_COLOR, dye);
+            SetItem.set(item, 5);
         }
         if(enableChestplate.get() && linearI == 1) {
             ItemStack item = new ItemStack(Items.LEATHER_CHESTPLATE);
-            item.setNbt(nbt);
-            CreativeSetItem.set(item, 6);
+            item.set(DataComponentTypes.DYED_COLOR, dye);
+            SetItem.set(item, 6);
         }
         if(enableLeggings.get() && linearI == 2) {
             ItemStack item = new ItemStack(Items.LEATHER_LEGGINGS);
-            item.setNbt(nbt);
-            CreativeSetItem.set(item, 7);
+            item.set(DataComponentTypes.DYED_COLOR, dye);
+            SetItem.set(item, 7);
         }
         if(enableBoots.get() && linearI == 3) {
             ItemStack item = new ItemStack(Items.LEATHER_BOOTS);
-            item.setNbt(nbt);
-            CreativeSetItem.set(item, 8);
+            item.set(DataComponentTypes.DYED_COLOR, dye);
+            SetItem.set(item, 8);
         }
-        linearI += 1;
+        linearI++;
         if(linearI >= 4) {
             linearI = 0;
         }

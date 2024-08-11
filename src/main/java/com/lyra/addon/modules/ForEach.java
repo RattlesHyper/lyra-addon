@@ -5,6 +5,7 @@ import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket;
 import net.minecraft.client.network.PlayerListEntry;
@@ -24,7 +25,7 @@ public class ForEach extends Module {
     private final Setting<List<String>> messages = sgGeneral.add(new StringListSetting.Builder()
         .name("message")
         .description("The specified message sent to the server.")
-        .defaultValue("/msg %player% hi")
+        .defaultValue("/msg %target% hi from %me%")
         .build()
     );
     private final Setting<Integer> delayTime = sgGeneral.add(new IntSetting.Builder()
@@ -110,7 +111,7 @@ public class ForEach extends Module {
                     boolean isMatch = Pattern.matches(regex, playerName);
                     if (isMatch) {
                         for (String msg : messages.get()) {
-                            ChatUtils.sendPlayerMsg(msg.replaceAll("%player%", playerName));
+                            ChatUtils.sendPlayerMsg(msg.replaceAll("%target%", playerName).replaceAll("%me%", EntityUtils.getName(mc.player)));
                         }
                         if (isLogs.get()) {
                             info("Used command on §a" + playerName + "§7.");
@@ -145,7 +146,7 @@ public class ForEach extends Module {
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event)  {
         if (event.packet instanceof DeathMessageS2CPacket packet) {
-            Entity entity = mc.world.getEntityById(packet.getEntityId());
+            Entity entity = mc.world.getEntityById(packet.playerId());
             if (entity == mc.player && toggleOnDeath.get()) {
                 toggle();
                 info("Toggled off because you died.");

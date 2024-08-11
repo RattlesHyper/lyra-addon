@@ -1,8 +1,7 @@
 package com.lyra.addon.modules;
 
 import com.lyra.addon.Addon;
-import com.mojang.brigadier.StringReader;
-import meteordevelopment.meteorclient.commands.arguments.CompoundNbtTagArgumentType;
+import com.lyra.addon.utils.SetItem;
 import meteordevelopment.meteorclient.events.world.PlaySoundEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -11,8 +10,6 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 
 import java.util.*;
 import java.util.List;
@@ -36,22 +33,10 @@ public class CustomHead extends Module {
         .sliderMax(20)
         .build()
     );
-    private final Setting<Boolean> isCustomNbt = sgGeneral.add(new BoolSetting.Builder()
-        .name("enable-custom-nbt")
-        .description("Enable custom NBT.")
-        .defaultValue(false)
-        .build()
-    );
-    private final Setting<List<String>> customNbt = sgGeneral.add(new StringListSetting.Builder()
-        .name("custom-nbt")
-        .description("Custom NBT to set to the items.")
-        .defaultValue(List.of("{Enchantments:[{id:\"minecraft:aqua_affinity\",lvl:0s}]}"))
-        .visible(isCustomNbt::get)
-        .build()
-    );
+
     private final Setting<Boolean> toggleOnLog = sgExtra.add(new BoolSetting.Builder()
         .name("toggle-on-log")
-        .description("Disables RGB armor when you disconnect from a server.")
+        .description("Disables when you disconnect from a server.")
         .defaultValue(true)
         .build()
     );
@@ -66,9 +51,6 @@ public class CustomHead extends Module {
     }
 
     private int ticks;
-    boolean isIndex = false;
-    boolean isHSB = false;
-    private int nbtI;
 
     @Override
     public void onActivate() {
@@ -76,7 +58,6 @@ public class CustomHead extends Module {
             error("Creative mode only.");
             this.toggle();
         }
-        nbtI = 0;
     }
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
@@ -85,7 +66,6 @@ public class CustomHead extends Module {
     }
     @EventHandler
     private void onPlaySound(PlaySoundEvent event) {
-        System.out.println(event.sound.getId());
         if (event.sound.getId().toString().startsWith("minecraft:item.armor.equip") && blockSound.get()) {
             event.cancel();
         }
@@ -99,22 +79,7 @@ public class CustomHead extends Module {
             if (selectedItems.isEmpty()) return;
             ItemStack itemStack = new ItemStack(selectedItems.get(0 % selectedItems.size()));
 
-            // Apply enchantments
-            if (!customNbt.get().isEmpty() && isCustomNbt.get()) {
-                if (nbtI >= customNbt.get().size()) nbtI = 0;
-                String nbt = customNbt.get().get(nbtI);
-                try {
-                    if (!Objects.equals(nbt, "")) {
-                    itemStack.setNbt(CompoundNbtTagArgumentType.create().parse(new StringReader(nbt)));
-                    }
-                }
-                catch (CommandSyntaxException e) {
-                    throw new RuntimeException(e);
-                }
-                nbtI++;
-            }
-            CreativeInventoryActionC2SPacket packet = new CreativeInventoryActionC2SPacket(5, itemStack);
-            mc.player.networkHandler.sendPacket(packet);
+            SetItem.set(itemStack, 5);
         }
     }
 }

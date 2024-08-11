@@ -3,7 +3,7 @@
   "id": "lyra-addon",
   "version": "${version}",
   "name": "Lyra Addon",
-  "description": "An addon to improve creative mode experience for Meteor Client",
+  "description": "Lyra Addon is a Meteor Client add-on specifically designed for Creative Mode and Creative servers.",
   "authors": [
     "RattlesHyper",
     "gasps"
@@ -18,9 +18,7 @@
       "com.lyra.addon.Addon"
     ]
   },
-  "mixins": [
-    "lyra.mixins.json"
-  ],
+  "mixins": [],
   "custom": {
     "meteor-client:color": "225,25,25"
   },

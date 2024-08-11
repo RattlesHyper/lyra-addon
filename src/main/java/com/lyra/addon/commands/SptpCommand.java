@@ -13,9 +13,7 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class SptpCommand extends Command {
     public SptpCommand() {
         super("sptp", "Teleports you with Spectator Mode Teleport packet.");

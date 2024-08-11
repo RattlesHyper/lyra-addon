@@ -8,7 +8,7 @@ import meteordevelopment.orbit.EventHandler;
 
 public class NoClearChat extends Module {
     public NoClearChat() {
-        super(Addon.CATEGORY, "no-clear-chat", "Disables /clearchat method.");
+        super(Addon.CATEGORY, "no-clear-chat", "Bypasses EssentialsX chat clear method.");
     }
     @EventHandler
     private void onMessageReceive(ReceiveMessageEvent event) {

@@ -1,15 +1,13 @@
 package com.lyra.addon.commands;
 
+import com.lyra.addon.utils.SetItem;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
 import net.minecraft.command.CommandSource;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.text.Text;
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class RenameCommand extends Command {
     public RenameCommand() {
@@ -34,11 +32,14 @@ public class RenameCommand extends Command {
             error("Creative mode only.");
             return;
         }
-        ItemStack heldItemStack = mc.player.getMainHandStack().copy();
+        ItemStack heldItemStack = mc.player.getInventory().getMainHandStack().copy();
+
         if (!heldItemStack.isEmpty()) {
             ItemStack itemStack = heldItemStack.copy();
-            itemStack.setCustomName(Text.of(customName.replaceAll("&", "§")));
-            mc.player.networkHandler.sendPacket(new CreativeInventoryActionC2SPacket(36 + mc.player.getInventory().selectedSlot, itemStack));
+            itemStack.remove(DataComponentTypes.CUSTOM_DATA);
+            itemStack.set(DataComponentTypes.CUSTOM_NAME, Text.literal(customName.replaceAll("&", "§")));
+            SetItem.setMainHand(itemStack);
         }
+
     }
 }

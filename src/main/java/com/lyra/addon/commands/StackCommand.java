@@ -1,14 +1,11 @@
 package com.lyra.addon.commands;
 
+import com.lyra.addon.utils.SetItem;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import meteordevelopment.meteorclient.commands.Command;
 import net.minecraft.command.CommandSource;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class StackCommand extends Command {
     public StackCommand() {
@@ -47,7 +44,7 @@ public class StackCommand extends Command {
         if (!heldItemStack.isEmpty()) {
             ItemStack itemStack = heldItemStack.copy();
             itemStack.setCount(stackAmount);
-            mc.player.networkHandler.sendPacket(new CreativeInventoryActionC2SPacket(36 + mc.player.getInventory().selectedSlot, itemStack));
+            SetItem.setMainHand(itemStack);
         }
     }
 }

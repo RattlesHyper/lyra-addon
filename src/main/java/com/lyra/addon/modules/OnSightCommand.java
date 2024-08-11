@@ -1,7 +1,7 @@
 package com.lyra.addon.modules;
 
 import com.lyra.addon.Addon;
-import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import com.lyra.addon.utils.WarpExploit;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
@@ -16,15 +16,13 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
-
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class OnSightCommand extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -35,7 +33,7 @@ public class OnSightCommand extends Module {
     private final Setting<List<String>> messages = sgGeneral.add(new StringListSetting.Builder()
         .name("message")
         .description("The specified message sent to the server.")
-        .defaultValue("/msg %player% hi")
+        .defaultValue("/msg %target% hi from %me%")
         .build()
     );
     private final Setting<Boolean> isTeleport = sgGeneral.add(new BoolSetting.Builder()
@@ -91,6 +89,7 @@ public class OnSightCommand extends Module {
     public OnSightCommand() {
         super(Addon.CATEGORY, "on-sight-command", "Executes commands on players on sight.");
     }
+
     @Override
     public void onDeactivate() {
         targets.clear();
@@ -117,49 +116,14 @@ public class OnSightCommand extends Module {
 
     private void start(Entity target) {
         double tx = target.getX(), ty = target.getY(), tz = target.getZ();
-        if (isTeleport.get()) warpPlayer(mc.player.getX(), mc.player.getY(), mc.player.getZ(), tx, ty, tz);
+
+        if (isTeleport.get()) WarpExploit.warp(mc.player.getX(), mc.player.getY(), mc.player.getZ(), tx, ty, tz);;
         for (String msg : messages.get()) {
-            ChatUtils.sendPlayerMsg(msg.replaceAll("%player%", target.getName().getString()));
+            ChatUtils.sendPlayerMsg(msg.replaceAll("%target%", target.getName().getString()).replaceAll("%me%", Objects.requireNonNull(EntityUtils.getName(mc.player))));
         }
-        if (isTeleport.get()) warpPlayer(mc.player.getX(), mc.player.getY(), mc.player.getZ(), tx, ty, tz);
+        if (isTeleport.get()) WarpExploit.warp(tx, ty, tz, mc.player.getX(), mc.player.getY(), mc.player.getZ());
     }
 
-    private void warpPlayer(double x1, double y1, double z1, double x2, double y2, double z2) {
-
-        double distance = calculateDistance(x1, y1, z1, x2, y2, z2);
-        int packetsRequired = (int) Math.ceil(Math.abs(distance / 10));
-
-        for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
-        }
-
-        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(x2, y2, z2, true));
-    }
-
-    public static double calculateDistance(double x1, double y1, double z1, double x2, double y2, double z2) {
-        double dx = x2 - x1;
-        double dy = y2 - y1;
-        double dz = z2 - z1;
-
-        return Math.sqrt(dx * dx + dy * dy + dz * dz);
-    }
-
-    public Entity getTarget() {
-        if (!targets.isEmpty()) return targets.get(0);
-        return null;
-    }
-
-    @Override
-    public String getInfoString() {
-        if (!targets.isEmpty()) return EntityUtils.getName(getTarget());
-        return null;
-    }
-    @EventHandler
-    private void onKey(KeyEvent event) {
-        if (mc.options.useKey.matchesKey(event.key, 0) || mc.options.useKey.matchesMouse(event.key)) {
-            System.out.println("test");
-        }
-    }
     @EventHandler
     private void onRender3D(Render3DEvent event) {
         if (isRender.get()) {

@@ -1,9 +1,11 @@
 package com.lyra.addon.modules;
 
 import com.lyra.addon.Addon;
+import meteordevelopment.meteorclient.events.game.GameLeftEvent;
+import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
+import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 
@@ -22,26 +24,37 @@ public class JoinMessage extends Module {
     private final Setting<List<String>> messages = sgGeneral.add(new StringListSetting.Builder()
         .name("messages")
         .description("Messages to send on player join.")
-        .defaultValue(List.of("(me) just joined the server."))
+        .defaultValue(List.of("%me% just joined the server."))
         .build()
     );
     public JoinMessage() {
-        super(Addon.CATEGORY, "join-message", "Runs command when you spawn in a server. Put (me) to put username automatically.");
+        super(Addon.CATEGORY, "join-message", "Runs command when you spawn in a server.");
     }
     private final Timer timer = new Timer();
+    private Boolean isJoined = false;
+
     @EventHandler
-    private void onGameJoined(GameJoinedEvent event) {
-        if (!isActive()) return;
+    private void onPacket(PacketEvent.Receive event) {
+        if (isJoined) return;
+        String detectPacket = "ChunkDataS2CPacket";
+        if (event.packet.getClass().toString().contains(detectPacket)) {
+            isJoined = true;
+        }
+
         if (messages.get().isEmpty()) return;
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 if (mc.player != null) {
                     for (String msg : messages.get()) {
-                        ChatUtils.sendPlayerMsg(msg.replaceAll("(me)", String.valueOf(mc.player.getName())));
+                        ChatUtils.sendPlayerMsg(msg.replaceAll("%me%", EntityUtils.getName(mc.player)));
                     }
                 }
             }
         }, delay.get());
+    }
+    @EventHandler
+    private void onGameLeft(GameLeftEvent event) {
+        isJoined = false;
     }
 }

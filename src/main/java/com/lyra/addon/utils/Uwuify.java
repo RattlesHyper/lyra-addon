@@ -1,7 +1,6 @@
 package com.lyra.addon.utils;
 
 import java.util.Random;
-
 public class Uwuify {
 	private static final String[] facesArray = new String[] {
         " (・`ω´・) ",
