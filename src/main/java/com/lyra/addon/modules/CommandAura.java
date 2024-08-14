@@ -75,7 +75,7 @@ public class CommandAura extends Module {
     @EventHandler
     private void onEntityAdded(EntityAddedEvent event) {
         if (!(event.entity instanceof PlayerEntity) || event.entity.getUuid().equals(Objects.requireNonNull(mc.player).getUuid())) return;
-        if (!Pattern.matches(regex, event.entity.getName().getString())) return;
+        if (!Pattern.matches(regex, EntityUtils.getName(event.entity))) return;
         String targetName = event.entity.getName().getString();
 
         switch (targetMode.get()) {

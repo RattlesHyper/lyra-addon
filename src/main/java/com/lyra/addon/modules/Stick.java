@@ -6,6 +6,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
@@ -21,7 +22,6 @@ import org.joml.Vector3d;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
 
@@ -65,7 +65,6 @@ public class Stick extends Module{
         super(Addon.CATEGORY, "stick", "Stick to a player.");
     }
     private final List<Entity> targets = new ArrayList<>();
-    String regex = "[A-Za-z0-9_]+";
     Entity target = null;
 
     @Override
@@ -80,7 +79,6 @@ public class Stick extends Module{
         if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
         if (!PlayerUtils.isWithin(entity, range.get())) return false;
         if (!PlayerUtils.canSeeEntity(entity) && !PlayerUtils.isWithin(entity, range.get())) return false;
-        if (Pattern.matches(regex, entity.getName().toString())) return false;
         return entity.isPlayer();
     }
 
@@ -101,8 +99,8 @@ public class Stick extends Module{
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        checkEntity();
         if (target == null) return;
+        checkEntity();
         mc.player.getAbilities().flying = true;
 
         switch (followMode.get()) {
@@ -124,7 +122,9 @@ public class Stick extends Module{
             .map(GameProfile::getName)
             .toList();
 
-        if (!playerNamesList.contains(target.getName().toString())) target = null;
+        if (!playerNamesList.contains(EntityUtils.getName(target)) && targetMode.get() == Mode.Automatic) {
+            target = null;
+        }
 
         if (target == null && targetMode.get() == Mode.Automatic) {
             setTarget();

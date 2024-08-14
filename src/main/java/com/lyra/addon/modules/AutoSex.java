@@ -53,7 +53,6 @@ public class AutoSex extends Module{
         .defaultValue(Mode.Automatic)
         .onChanged(onChanged -> {
             target = null;
-            playerName = null;
         })
         .build()
     );
@@ -167,7 +166,6 @@ public class AutoSex extends Module{
     private int messageI, timer, timerSex, sexI;
     static double renderY;
     double addition = 0.0;
-    String playerName;
     Entity target = null;
 
     @Override
@@ -182,17 +180,16 @@ public class AutoSex extends Module{
         if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
         if (!PlayerUtils.isWithin(entity, range.get())) return false;
         if (!PlayerUtils.canSeeEntity(entity) && !PlayerUtils.isWithin(entity, range.get())) return false;
-        if (Pattern.matches(regex, entity.getName().toString())) return false;
+        if (Pattern.matches(regex, EntityUtils.getName(entity))) return true;
         return entity.isPlayer();
     }
 
     //middle click mode
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
-        if(targetMode.get() == Mode.MiddleClick){
+        if(targetMode.get() == Mode.MiddleClick) {
             if (event.action == KeyAction.Press && event.button == GLFW_MOUSE_BUTTON_MIDDLE && mc.currentScreen == null) {
                 if (mc.targetedEntity instanceof PlayerEntity) {
-                    playerName = mc.targetedEntity.getName().toString();
                     target = mc.targetedEntity;
 
                     if (message.get()) {
@@ -200,7 +197,6 @@ public class AutoSex extends Module{
                     }
                 } else  {
                     target = null;
-                    playerName = null;
                     mc.player.getAbilities().flying = false;
                 }
             }
@@ -220,9 +216,9 @@ public class AutoSex extends Module{
             }
         }
 
-        checkEntity();
-
         if (target == null) return;
+
+        checkEntity();
 
         if(sexPos.get()) {
             mc.player.getAbilities().flying = true;
@@ -275,7 +271,7 @@ public class AutoSex extends Module{
 
                 String text = messages.get().get(i);
 
-                ChatUtils.sendPlayerMsg(text.replaceAll("%player%", playerName));
+                ChatUtils.sendPlayerMsg(text.replaceAll("%player%", EntityUtils.getName(target)));
                 timer = delay.get();
             }
             else {
@@ -305,7 +301,6 @@ public class AutoSex extends Module{
     @Override
     public void onDeactivate() {
         target = null;
-        playerName = null;
         mc.player.getAbilities().flying = false;
     }
     private void checkEntity() {
@@ -314,7 +309,9 @@ public class AutoSex extends Module{
             .map(GameProfile::getName)
             .toList();
 
-        if (!playerNamesList.contains(target.getName().toString())) target = null;
+        if (!playerNamesList.contains(EntityUtils.getName(target)) && targetMode.get() == Mode.Automatic) {
+            target = null;
+        }
 
         if (target == null && targetMode.get() == Mode.Automatic) {
             setTarget();
@@ -324,7 +321,6 @@ public class AutoSex extends Module{
         TargetUtils.getList(targets, this::entityCheck, SortPriority.LowestDistance, 1);
         if(targets.isEmpty()) return;
         target = targets.get(0);
-        playerName = target.getName().toString();
         startMsg();
     }
     private static double getRenderY() {
@@ -338,7 +334,7 @@ public class AutoSex extends Module{
     }
     private void startMsg() {
         if (message.get()) {
-            ChatUtils.sendPlayerMsg("Come here " + playerName + " I want you uwu");
+            ChatUtils.sendPlayerMsg("Come here " + EntityUtils.getName(target) + " I want you uwu");
         }
     }
     private static boolean shouldCum() {

@@ -2,6 +2,7 @@ package com.lyra.addon.modules;
 
 import com.lyra.addon.Addon;
 import com.lyra.addon.utils.WarpExploit;
+import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
@@ -10,6 +11,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
+import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -99,10 +101,13 @@ public class OnSightCommand extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (!mc.player.isAlive()) return;
         TargetUtils.getList(targets, this::entityCheck, SortPriority.ClosestAngle, maxTargets.get());
-        if (!mc.options.attackKey.isPressed()) return;
-        targets.forEach(this::start);
+    }
+    @EventHandler
+    private void onKey(MouseButtonEvent event) {
+        if (event.action == KeyAction.Press) {
+            targets.forEach(this::start);
+        }
     }
 
     private boolean entityCheck(Entity entity) {
@@ -110,7 +115,7 @@ public class OnSightCommand extends Module {
         if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
         if (!PlayerUtils.isWithin(entity, range.get())) return false;
         if (!PlayerUtils.canSeeEntity(entity) && !PlayerUtils.isWithin(entity, wallsRange.get())) return false;
-        if (!Pattern.matches(regex, entity.getName().getString())) return false;
+        if (Pattern.matches(regex, EntityUtils.getName(entity))) return true;
         return entity.isPlayer();
     }
 
@@ -119,7 +124,7 @@ public class OnSightCommand extends Module {
 
         if (isTeleport.get()) WarpExploit.warp(mc.player.getX(), mc.player.getY(), mc.player.getZ(), tx, ty, tz);;
         for (String msg : messages.get()) {
-            ChatUtils.sendPlayerMsg(msg.replaceAll("%target%", target.getName().getString()).replaceAll("%me%", Objects.requireNonNull(EntityUtils.getName(mc.player))));
+            ChatUtils.sendPlayerMsg(msg.replaceAll("%target%", EntityUtils.getName(target)).replaceAll("%me%", Objects.requireNonNull(EntityUtils.getName(mc.player))));
         }
         if (isTeleport.get()) WarpExploit.warp(tx, ty, tz, mc.player.getX(), mc.player.getY(), mc.player.getZ());
     }
